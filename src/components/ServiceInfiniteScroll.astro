@@ -1,0 +1,92 @@
+---
+import yo from "../assets/yo2.0.jpg";
+
+const services = [
+  { label: "FRONTEND", value: "React / Next.js / Astro", icon: "01" },
+  { label: "UI/UX DESIGN", value: "Figma / High-End", icon: "02" },
+  { label: "ANIMATION", value: "GSAP / Framer Motion", icon: "03" },
+  { label: "BACKEND", value: "Node.js / Supabase", icon: "04" },
+  { label: "CREATIVE", value: "Creative Coding", icon: "05" },
+];
+---
+
+<section id="services-pin" class="relative min-h-screen bg-zinc-950 border-t border-white/5 overflow-hidden">
+  <div class="container mx-auto px-6 py-12 relative z-[100]">
+     <h2 class="text-green-400 font-mono text-xs tracking-[0.5em] uppercase opacity-50">// Expertise</h2>
+  </div>
+
+  <div class="avatar-container absolute inset-0 flex items-center justify-center pointer-events-none z-[60]">
+    <div class="profile-card w-32 h-32 md:w-48 md:h-48 bg-zinc-900 border border-white/10 p-1 rounded-3xl overflow-hidden opacity-0 scale-50">
+      <img src={yo.src} alt="Mauricio" class="w-full h-full object-cover rounded-2xl grayscale" />
+    </div>
+  </div>
+
+  <div class="services-wrapper relative w-full h-screen flex flex-col items-center justify-center gap-4 z-50">
+    {services.map((item) => (
+      <div class="service-card group relative w-full max-w-4xl mx-auto flex items-center justify-between p-8 bg-zinc-900/40 border border-white/5 rounded-2xl backdrop-blur-md">
+        <div class="flex flex-col">
+          <span class="text-white font-['Archivo_Black'] text-3xl md:text-5xl uppercase tracking-tighter transition-all group-hover:text-green-400">{item.label}</span>
+          <span class="text-zinc-500 font-mono text-[10px] mt-2 tracking-widest uppercase">{item.value}</span>
+        </div>
+        <span class="text-zinc-800 font-['Archivo_Black'] text-6xl opacity-20">{item.icon}</span>
+      </div>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+  gsap.registerPlugin(ScrollTrigger);
+
+  const initServices = () => {
+    const cards = gsap.utils.toArray('.service-card') as HTMLElement[];
+    const avatar = document.querySelector('.profile-card');
+
+    // 1. PIN de la sección de servicios
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#services-pin",
+        start: "top top",
+        end: "+=3000", // Duración del scroll en esta sección
+        pin: true,
+        scrub: 1,
+      }
+    });
+
+    // 2. Animación del Avatar (Aparece al inicio)
+    tl.to(avatar, { opacity: 1, scale: 1, duration: 1 }, 0);
+
+    // 3. Animación de las Cards (Se abren al pasar por el centro)
+    cards.forEach((card, i) => {
+      // Posición inicial: amontonadas abajo
+      gsap.set(card, { y: 500, opacity: 0 });
+
+      tl.to(card, {
+        y: 0,
+        opacity: 1,
+        duration: 2,
+      }, i * 1.5) // Aparecen escalonadas
+      
+      // El "Push" cuando la card está sobre el avatar
+      .to(card, {
+        scale: 0.9,
+        opacity: 0.1, // Se desvanece para dejar ver el perfil
+        filter: "blur(8px)",
+        y: -100, // Sigue subiendo
+        duration: 2,
+      }, ">-0.5");
+    });
+
+    // Rotación sutil del avatar
+    tl.to(avatar, { rotate: 5, duration: 10 }, 0);
+  };
+
+  document.addEventListener('DOMContentLoaded', initServices);
+</script>
+
+<style>
+  .service-card { will-change: transform, opacity, filter; }
+  .profile-card { transition: border-color 0.5s ease; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+  .service-card:hover { border-color: rgba(0, 255, 135, 0.2); }
+</style>

@@ -1,0 +1,133 @@
+---
+import Layout from '../layouts/Layout.astro';
+import CardNav from '../components/Card-Nav';
+import { Github, BrainCircuit, ArrowUpRight, Terminal } from 'lucide-react';
+import ProjectSlider from "../components/ProjectSlider.astro";
+import Services from '../components/Services.astro';
+import Footer from '../components/Footer.astro';
+import About from '../components/About.astro'; // Componente de la órbita
+
+const response = await fetch('https://api.github.com/users/mau-jsx');
+const githubData = await response.json();
+---
+
+<Layout title="Mauricio Heredia | Portfolio 2026">
+  <CardNav client:load />
+
+  <main class="bg-[#080808]">
+    <section id="hero" class="relative min-h-screen w-full flex items-center pt-20 overflow-hidden">
+      <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
+        <div class="lg:col-span-7 z-10 space-y-8">
+          <div class="space-y-2">
+            <span class="text-[#C1FF00] font-mono text-xs uppercase tracking-[0.5em] animate-pulse">Available for projects</span>
+            <h1 class="text-[12vw] lg:text-[7vw] font-['Archivo_Black'] leading-[0.85] text-white uppercase italic tracking-tighter">
+              SOFTWARE <br/> <span class="hero-title-stroke stroke-text">ARCHITECT</span>
+            </h1>
+          </div>
+          <p class="text-zinc-500 text-lg md:text-xl max-w-xl font-light italic leading-relaxed">
+            Fusionando la precisión del hardware con la potencia de la <span class="text-white">Inteligencia Artificial</span> y el <span class="text-white">Desarrollo Fullstack</span>. 
+          </p>
+          <div class="flex gap-4">
+            <a href="#projects-pin" class="px-8 py-4 bg-[#C1FF00] text-black font-black uppercase text-xs rounded-full hover:scale-105 transition-transform flex items-center gap-2">
+              Explorar Trabajos <ArrowUpRight size={18} />
+            </a>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 grid grid-cols-2 gap-4 h-[500px] perspective-1000">
+          <div class="hero-bento-card col-span-2 bg-white/5 border border-white/10 rounded-[2rem] p-6 flex flex-col justify-between group hover:bg-[#C1FF00]/5 transition-colors">
+            <div class="flex justify-between items-start">
+               <div class="w-12 h-12 bg-[#C1FF00] rounded-2xl flex items-center justify-center text-black shadow-[0_0_20px_rgba(193,255,0,0.3)]">
+                  <Terminal size={24} />
+               </div>
+               <span class="text-[10px] font-mono text-zinc-600 uppercase">Current Stack</span>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-4">
+               {['Next.js', 'n8n', 'Python', 'Astro'].map(tech => (
+                 <span class="px-3 py-1 bg-white/5 rounded-full text-[9px] font-bold text-white/50 border border-white/5 uppercase tracking-tighter">{tech}</span>
+               ))}
+            </div>
+          </div>
+          <div class="hero-bento-card bg-zinc-900 border border-white/5 rounded-[2rem] p-6 flex flex-col justify-between hover:rotate-2 transition-transform cursor-pointer">
+            <Github className="text-[#C1FF00]" size={20} />
+            <div>
+              <p class="text-[2rem] font-black text-white leading-none tracking-tighter">{githubData.public_repos}</p>
+              <p class="text-[9px] text-zinc-500 uppercase font-mono mt-1">Public Repos</p>
+            </div>
+          </div>
+          <div class="hero-bento-card bg-[#C1FF00] rounded-[2.5rem] p-6 flex flex-col justify-between group overflow-hidden">
+             <BrainCircuit className="text-black" size={24} />
+             <div class="space-y-1">
+                <p class="text-xs font-black text-black uppercase leading-tight italic">AI Automation <br/> Expert</p>
+                <div class="w-full h-1 bg-black/10 rounded-full overflow-hidden">
+                   <div class="w-full h-full bg-black animate-progress origin-left"></div>
+                </div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <About />
+
+    <ProjectSlider />
+
+    <Services />
+    
+    <Footer />
+  </main>
+</Layout>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  window.addEventListener('load', () => {
+    ScrollTrigger.refresh();
+  });
+
+  // Animación Hero
+  const tl = gsap.timeline();
+  tl.from(".hero-title", { y: 100, opacity: 0, skewY: 7, duration: 1.5, ease: "power4.out" })
+    .from(".hero-bento-card", { scale: 0.8, opacity: 0, stagger: 0.1, duration: 1, ease: "back.out(1.7)" }, "-=1");
+
+  gsap.to("#hero", {
+    scrollTrigger: {
+      trigger: "#hero",
+      start: "top top",
+      end: "bottom top",
+      scrub: true
+    },
+    y: 100,
+    opacity: 0,
+    filter: "blur(10px)"
+  });
+
+  // Efecto 3D Bento
+  document.addEventListener('mousemove', (e) => {
+    const cards = document.querySelectorAll('.hero-bento-card');
+    const x = (window.innerWidth / 2 - e.pageX) / 50;
+    const y = (window.innerHeight / 2 - e.pageY) / 50;
+    
+    gsap.to(cards, {
+      rotateY: x,
+      rotateX: -y,
+      duration: 1,
+      ease: "power2.out"
+    });
+  });
+</script>
+
+<style>
+  .stroke-text {
+    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2);
+    color: transparent;
+  }
+  .perspective-1000 { perspective: 1000px; }
+  @keyframes progress {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  .animate-progress { animation: progress 2s ease-out forwards; }
+</style>

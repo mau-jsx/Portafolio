@@ -1,0 +1,100 @@
+---
+import Mauricio from "../assets/yo2.0.jpg";
+import { GraduationCap, Code2, Globe2, ArrowRight, Laptop, Sparkles } from 'lucide-react';
+
+const academic = [
+  { icon: GraduationCap, title: "Técnico en Informática", desc: "Base Técnica Sólida" },
+  { icon: Laptop, title: "Software Dev", desc: "Politécnico Formosa" },
+];
+
+const technical = [
+  { icon: Code2, title: "Frontend Soul", desc: "React & Next.js Expert" },
+  { icon: Globe2, title: "Fullstack Dev", desc: "Escalabilidad & IA" },
+];
+---
+
+<section id="about" class="relative min-h-screen bg-[#0a0a0a] py-20 flex items-center justify-center overflow-hidden">
+  
+  <div class="max-w-7xl mx-auto px-6 w-full relative z-10">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-20 items-center">
+      
+      <div class="flex flex-col gap-6 order-2 lg:order-1">
+        {academic.map((item) => (
+          <div class="info-card bg-white/[0.03] border border-white/5 p-6 rounded-[2rem] flex items-center gap-5 hover:border-[#C1FF00]/40 transition-all group">
+            <div class="w-12 h-12 bg-[#C1FF00] rounded-2xl flex items-center justify-center text-black shadow-[0_0_20px_rgba(193,255,0,0.2)]">
+              <item.icon size={22} />
+            </div>
+            <div>
+              <h4 class="text-white text-sm font-black uppercase italic leading-tight">{item.title}</h4>
+              <p class="text-zinc-500 text-[10px] uppercase mt-1 tracking-widest">{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="relative flex flex-col items-center order-1 lg:order-2">
+        <div class="relative w-48 h-48 md:w-64 md:h-64">
+           <div class="absolute inset-[-20%] border border-[#C1FF00]/10 rounded-full animate-[spin_20s_linear_infinite]"></div>
+           <div class="absolute inset-[-40%] border border-white/5 rounded-full animate-[spin_30s_linear_infinite_reverse]"></div>
+           
+           <div class="relative z-10 w-full h-full rounded-full overflow-hidden border-4 border-zinc-900 shadow-2xl">
+             <img src={Mauricio.src} alt="Mauri" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+           </div>
+        </div>
+        <div class="mt-8 text-center">
+          <span class="text-[#C1FF00] font-mono text-[10px] uppercase tracking-[0.5em] block mb-2">Portfolio 2026</span>
+          <h3 class="text-white font-['Archivo_Black'] italic uppercase text-2xl tracking-tighter">Mauri.jsx</h3>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-6 order-3 lg:order-3">
+        {technical.map((item) => (
+          <div class="info-card bg-white/[0.03] border border-white/5 p-6 rounded-[2rem] flex items-center gap-5 hover:border-[#C1FF00]/40 transition-all group">
+            <div class="w-12 h-12 bg-[#C1FF00] rounded-2xl flex items-center justify-center text-black shadow-[0_0_20px_rgba(193,255,0,0.2)]">
+              <item.icon size={22} />
+            </div>
+            <div>
+              <h4 class="text-white text-sm font-black uppercase italic leading-tight">{item.title}</h4>
+              <p class="text-zinc-500 text-[10px] uppercase mt-1 tracking-widest">{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+    </div>
+
+    <div class="flex justify-center mt-20">
+      <a href="#projects-pin" class="group flex items-center gap-4 bg-[#C1FF00] px-8 py-4 rounded-full hover:scale-105 transition-all active:scale-95 shadow-lg shadow-[#C1FF00]/10">
+        <span class="text-black font-black uppercase italic text-xs tracking-widest">Ver mi trabajo</span>
+        <ArrowRight size={18} className="text-black group-hover:translate-x-1 transition-transform" />
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Arreglo para que cargue instantáneo
+  function initAbout() {
+    gsap.from(".info-card", {
+      scrollTrigger: {
+        trigger: "#about",
+        start: "top 80%",
+        onEnter: () => ScrollTrigger.refresh() // Refresca para evitar errores de posición
+      },
+      x: (i) => (i < 2 ? -50 : 50),
+      opacity: 0,
+      stagger: 0.1,
+      duration: 0.8,
+      ease: "power2.out",
+      clearProps: "all"
+    });
+  }
+
+  // Ejecutar al cargar y en cambios de navegación
+  window.addEventListener('load', initAbout);
+  document.addEventListener('astro:after-swap', initAbout);
+</script>
