@@ -1,71 +1,47 @@
 ---
 import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { 
+  title = "Mauricio Heredia | Frontend Developer", 
+  description = "Portafolio de Mauricio Heredia - Desarrollador Frontend" 
+} = Astro.props;
 ---
 
 <!doctype html>
-<html lang="es" class="bg-[#080808]"> <head>
+<html lang="es" class="bg-[#080808] text-[#F9F6EE] scroll-smooth">
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <meta name="generator" content={Astro.generator} />
-    <title>Mauricio Heredia - Programador</title>
+    <meta name="description" content={description} />
+    <title>{title}</title>
   </head>
-  <body class="text-[#F5F5F7] antialiased selection:bg-[#C1FF00] selection:text-black">
-    <main id="main-container" class="relative w-full">
-      <slot />
-    </main>
-
-    <script>
-      import gsap from 'gsap';
-      import { ScrollTrigger } from 'gsap/ScrollTrigger';
-      import Lenis from '@studio-freight/lenis';
-
-      gsap.registerPlugin(ScrollTrigger);
-
-      const lenis = new Lenis({
-        lerp: 0.1, // Suavidad de respuesta
-        wheelMultiplier: 1,
-      });
-
-      lenis.on('scroll', ScrollTrigger.update);
-
-      gsap.ticker.add((time) => {
-        lenis.raf(time * 1000);
-      });
-
-      gsap.ticker.lagSmoothing(0);
-
-      // Reset de scroll al recargar para evitar errores de GSAP
-      window.history.scrollRestoration = 'manual';
-    </script>
+  <body class="bg-[#080808] text-[#F9F6EE] font-['Montserrat'] antialiased min-h-screen selection:bg-[#00D26A] selection:text-black">
+    <slot />
   </body>
 </html>
 
 <style is:global>
-  /* 1. RESET CRÍTICO */
-  html, body {
+  * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
     width: 100%;
-    overflow-x: hidden; /* Evita que las cosas se salgan por los lados */
+    min-height: 100%;
     background-color: #080808;
-  }
-
-  /* 2. FUENTE PREDETERMINADA */
-  body {
-    font-family: 'Archivo Black', sans-serif;
-  }
-
-  /* 3. ARREGLO PARA NAVBAR (EVITA QUE SE ROMPA) */
-  nav {
-    max-width: fit-content;
-  }
-
-  /* 4. PREVENIR SALTOS DE LAYOUT */
-  img {
-    max-width: 100%;
-    height: auto;
-    display: block;
+    color: #F9F6EE;
+    font-family: 'Montserrat', sans-serif;
   }
 </style>

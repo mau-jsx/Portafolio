@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@theme {
+  --font-montserrat: 'Montserrat', sans-serif;
+
+  --color-brand-green: #00D26A;
+  --color-brand-blue: #0052FF;
+  --color-brand-cream: #F9F6EE;
+  --color-brand-black: #080808;
+}
+
+@layer base {
+  html, body {
+    font-family: 'Montserrat', sans-serif;
+  }
+}
