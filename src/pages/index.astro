@@ -1,38 +1,63 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import StaggeredNavbar from '../components/StaggeredNavbar';
+import AvatarGreeting from '../components/AvatarGreeting';
 ---
 
 <Layout title="Mauricio Heredia | Portafolio">
-  <main class="min-h-screen w-full bg-[#080808] text-[#F9F6EE] flex flex-col justify-between p-8 md:p-16 selection:bg-[#00D26A] selection:text-black">
-    
-    <!-- Top Header -->
-    <header class="flex justify-between items-center text-xs tracking-[0.3em] uppercase text-zinc-500 font-medium">
-      <span class="text-[#00D26A] font-semibold">Mauricio Heredia</span>
-      <span>Frontend Developer</span>
-      <span class="hidden sm:inline">2026</span>
-    </header>
+  <!-- Avatar interactivo en la izquierda -->
+  <AvatarGreeting client:load />
 
+  <!-- Navbar centrado y compacto con theme toggle -->
+  <StaggeredNavbar client:load />
+
+  <main id="hero" class="relative z-10 min-h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 pt-28 pb-10 selection:bg-[#00D26A] selection:text-black transition-colors duration-400">
+    
     <!-- Center Hero -->
-    <section class="my-auto py-20 flex flex-col items-start justify-center">
-      <div class="inline-flex items-center gap-3 px-3 py-1 rounded-full border border-white/10 bg-white/[0.02] mb-6">
-        <span class="w-2 h-2 rounded-full bg-[#0052FF] animate-pulse"></span>
-        <span class="text-[11px] font-medium tracking-widest uppercase text-zinc-400">Empezando de 0</span>
+    <section class="max-w-7xl mx-auto w-full my-auto py-8 flex flex-col items-start justify-center">
+      <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.04] mb-8 transition-colors">
+        <span class="w-2 h-2 rounded-full bg-[#00D26A] animate-pulse"></span>
+        <span class="text-xs font-bold tracking-widest uppercase text-zinc-600 dark:text-zinc-300">Creative Frontend Engineer</span>
       </div>
       
-      <h1 class="text-[14vw] md:text-[11vw] font-black uppercase tracking-tighter leading-[0.85] text-[#F9F6EE]">
-        PORTAFOLIO
+      <h1 class="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-[0.88] text-[#080808] dark:text-[#F9F6EE] transition-colors">
+        PORTAFOLIO <br />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00D26A] via-[#0052FF] to-[#00D26A]">2026</span>
       </h1>
+      
+      <p class="mt-8 text-zinc-600 dark:text-zinc-400 text-base sm:text-lg md:text-xl max-w-2xl font-light leading-relaxed transition-colors">
+        Construyendo experiencias web interactivas, interfaces de alto impacto visual y animaciones fluidas con GSAP y Three.js.
+      </p>
+
+      <div class="mt-10 flex flex-wrap items-center gap-4">
+        <a
+          href="#proyectos"
+          class="px-7 py-3.5 rounded-full bg-[#00D26A] hover:bg-[#00E676] text-black font-black text-xs uppercase tracking-wider transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-[#00D26A]/20"
+        >
+          Explorar Proyectos
+        </a>
+        <a
+          href="#contacto"
+          class="px-7 py-3.5 rounded-full border border-black/20 dark:border-white/20 hover:border-black dark:hover:border-white text-black dark:text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/5"
+        >
+          Contactar
+        </a>
+      </div>
     </section>
 
     <!-- Bottom Footer -->
-    <footer class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs text-zinc-500 tracking-wider">
-      <div class="flex items-center gap-2">
-        <span class="w-3 h-3 rounded-full bg-[#00D26A]" title="Verde Fuerte"></span>
-        <span class="w-3 h-3 rounded-full bg-[#0052FF]" title="Azul Fuerte"></span>
-        <span class="w-3 h-3 rounded-full bg-[#F9F6EE]" title="Estilo Crema"></span>
-        <span class="w-3 h-3 rounded-full bg-black border border-white/20" title="Negro"></span>
+    <footer class="max-w-7xl mx-auto w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs text-zinc-500 tracking-wider pt-8 border-t border-black/10 dark:border-white/5 transition-colors">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-[#00D26A]" title="Verde Fuerte"></span>
+          <span class="w-3 h-3 rounded-full bg-[#0052FF]" title="Azul Fuerte"></span>
+          <span class="w-3 h-3 rounded-full bg-[#F9F6EE] border border-black/20" title="Estilo Crema"></span>
+          <span class="w-3 h-3 rounded-full bg-black border border-white/20" title="Negro"></span>
+        </div>
+        <span class="text-zinc-400 dark:text-zinc-600">|</span>
+        <span>Astro + React + GSAP + Three.js</span>
       </div>
-      <p class="font-light">Listo para el nuevo diseño</p>
+      <p class="font-medium text-zinc-600 dark:text-zinc-400">Diseñado & Desarrollado por Mauricio Heredia</p>
     </footer>
 
   </main>

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-montserrat: 'Montserrat', sans-serif;
 
@@ -10,7 +12,19 @@
 }
 
 @layer base {
-  html, body {
+  html {
     font-family: 'Montserrat', sans-serif;
+  }
+
+  html.dark {
+    background-color: #080808;
+    color: #F9F6EE;
+    color-scheme: dark;
+  }
+
+  html.light {
+    background-color: #F9F6EE;
+    color: #080808;
+    color-scheme: light;
   }
 }

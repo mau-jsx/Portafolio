@@ -13,7 +13,7 @@ const {
 ---
 
 <!doctype html>
-<html lang="es" class="bg-[#080808] text-[#F9F6EE] scroll-smooth">
+<html lang="es" class="scroll-smooth antialiased">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -24,24 +24,19 @@ const {
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <script is:inline>
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      }
+    </script>
   </head>
-  <body class="bg-[#080808] text-[#F9F6EE] font-['Montserrat'] antialiased min-h-screen selection:bg-[#00D26A] selection:text-black">
+  <body class="min-h-screen bg-[#F9F6EE] text-[#080808] dark:bg-[#080808] dark:text-[#F9F6EE] selection:bg-[#00D26A] selection:text-black transition-colors duration-300">
     <slot />
   </body>
 </html>
-
-<style is:global>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  html, body {
-    width: 100%;
-    min-height: 100%;
-    background-color: #080808;
-    color: #F9F6EE;
-    font-family: 'Montserrat', sans-serif;
-  }
-</style>
