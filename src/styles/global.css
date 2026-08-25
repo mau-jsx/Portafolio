@@ -4,6 +4,7 @@
 
 @theme {
   --font-montserrat: 'Montserrat', sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
 
   --color-brand-green: #00D26A;
   --color-brand-blue: #0052FF;
@@ -14,6 +15,14 @@
 @layer base {
   html {
     font-family: 'Montserrat', sans-serif;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+    width: 0px;
+    background: transparent;
   }
 
   html.dark {

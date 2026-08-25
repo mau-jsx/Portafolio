@@ -90,7 +90,7 @@ export const AvatarGreeting: React.FC = () => {
   };
 
   return (
-    <div className="fixed top-6 left-6 md:left-12 z-50 select-none">
+    <div className="fixed top-6 left-8 sm:left-12 md:left-16 lg:left-20 z-50 select-none">
       {/* Botón Avatar */}
       <button
         ref={avatarBtnRef}

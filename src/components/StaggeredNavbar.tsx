@@ -13,11 +13,10 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { num: '01', name: 'Inicio', href: '#hero' },
-  { num: '02', name: 'Portafolio', href: '#proyectos' },
-  { num: '03', name: 'Habilidades', href: '#skills' },
-  { num: '04', name: 'Servicios', href: '#servicios' },
-  { num: '05', name: 'Sobre Mí', href: '#about' },
-  { num: '06', name: 'Contacto', href: '#contacto', badge: 'Online' },
+  { num: '02', name: 'Sobre mí', href: '#sobre-mi' },
+  { num: '03', name: 'Portafolio', href: '#portafolio' },
+  { num: '04', name: 'Experiencia y Formación', href: '#experiencia' },
+  { num: '05', name: 'Contacto', href: '#contacto', badge: 'Online' },
 ];
 
 export const StaggeredNavbar: React.FC = () => {
@@ -70,7 +69,6 @@ export const StaggeredNavbar: React.FC = () => {
       Math.max(y, window.innerHeight - y)
     );
 
-    // Aplicar cambio de clases y almacenamiento inmediatamente
     if (nextDark) {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
@@ -105,31 +103,28 @@ export const StaggeredNavbar: React.FC = () => {
     }
   };
 
-  // Animación de apertura y cierre del menú con GSAP
+  // Animación de apertura y cierre del menú con GSAP en el contenedor centrado
   useEffect(() => {
     const card = menuCardRef.current;
     const backdrop = backdropRef.current;
     const items = linksRef.current.filter(Boolean);
     const connect = connectCardRef.current;
 
-    if (!card) return;
+    if (!card || !backdrop) return;
 
     if (isOpen) {
-      card.style.display = 'flex';
-      if (backdrop) backdrop.style.display = 'block';
+      backdrop.style.display = 'flex';
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-      if (backdrop) {
-        tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0);
-      }
+      tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0);
 
       tl.fromTo(
         card,
         {
           opacity: 0,
-          scale: 0.85,
-          y: -15,
+          scale: 0.88,
+          y: -20,
           transformOrigin: 'top center',
         },
         {
@@ -137,7 +132,7 @@ export const StaggeredNavbar: React.FC = () => {
           scale: 1,
           y: 0,
           duration: 0.45,
-          ease: 'back.out(1.25)',
+          ease: 'back.out(1.2)',
         },
         0
       );
@@ -163,38 +158,18 @@ export const StaggeredNavbar: React.FC = () => {
       const tl = gsap.timeline({
         defaults: { ease: 'power2.in' },
         onComplete: () => {
-          if (card) card.style.display = 'none';
-          if (backdrop) backdrop.style.display = 'none';
+          backdrop.style.display = 'none';
         },
       });
 
-      if (backdrop) {
-        tl.to(backdrop, { opacity: 0, duration: 0.2 }, 0);
-      }
-
+      tl.to(backdrop, { opacity: 0, duration: 0.2 }, 0);
       tl.to(card, { opacity: 0, scale: 0.9, y: -10, duration: 0.2 }, 0);
     }
   }, [isOpen, isDesktop]);
 
-  // Cerrar con Escape
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        setIsOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
-
-  const handleItemClick = (name: string) => {
-    setActiveItem(name);
-    setIsOpen(false);
-  };
-
   return (
     <>
-      {/* Overlay para la animación circular dinámica de tema (solo en el fondo, debajo del contenido y navbar) */}
+      {/* CAPA DE ANIMACIÓN CIRCULAR DE CAMBIO DE TEMA */}
       <div
         ref={rippleOverlayRef}
         style={{ display: 'none' }}
@@ -202,27 +177,42 @@ export const StaggeredNavbar: React.FC = () => {
         aria-hidden="true"
       />
 
-      {/* NAVBAR CENTRADO Y COMPACTO EN EL MEDIO */}
+      {/* ======================================================== */}
+      {/* NAVBAR MAESTRO UNIFICADO: AVATAR + MENU + THEME TOGGLE   */}
+      {/* ======================================================== */}
       <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
-        <nav className="flex items-center gap-2 bg-[#0d0d0d]/85 hover:bg-[#0d0d0d] text-[#F9F6EE] p-1.5 px-3 rounded-full border border-white/20 shadow-[0_15px_45px_rgba(0,0,0,0.85)] backdrop-blur-2xl transition-all duration-300 select-none">
+        <nav className="flex items-center gap-2 bg-[#0d0d0d]/90 hover:bg-[#0d0d0d] text-[#F9F6EE] p-1.5 px-2 rounded-full border border-white/20 shadow-[0_15px_45px_rgba(0,0,0,0.85)] backdrop-blur-2xl transition-all duration-300 select-none">
           
-          {/* Botón Trigger del Menú */}
+          {/* Botón Trigger del Menú con Avatar Integrado */}
           <button
             onClick={() => setIsOpen((prev) => !prev)}
             aria-expanded={isOpen}
-            aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
-            className="group flex items-center gap-2.5 bg-[#F9F6EE] hover:bg-white text-[#080808] pl-2 pr-4 py-1.5 rounded-full font-black text-xs uppercase tracking-[0.18em] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+            aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú de navegación y contacto'}
+            className="group flex items-center gap-2.5 bg-[#F9F6EE] hover:bg-white text-[#080808] pl-1.5 pr-4 py-1.5 rounded-full font-black text-xs uppercase tracking-[0.18em] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer font-poppins"
           >
-            <div className="w-6 h-6 rounded-full bg-[#080808] text-[#F9F6EE] flex items-center justify-center transition-transform duration-500 group-hover:rotate-180">
-              {isOpen ? <X size={12} strokeWidth={3} /> : <Menu size={12} strokeWidth={3} />}
+            {/* Avatar Circular Integrado */}
+            <div className="w-7 h-7 rounded-full overflow-hidden border border-black/15 bg-black shrink-0">
+              <img
+                src="/avatar.jpg"
+                alt="Mauricio Heredia"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/favicon.svg';
+                }}
+              />
             </div>
+
             <span>{isOpen ? 'CERRAR' : 'MENU'}</span>
+
+            <div className="w-5 h-5 rounded-full bg-[#080808] text-[#F9F6EE] flex items-center justify-center transition-transform duration-500 group-hover:rotate-180">
+              {isOpen ? <X size={11} strokeWidth={3} /> : <Menu size={11} strokeWidth={3} />}
+            </div>
           </button>
 
           {/* Separador vertical */}
           <div className="w-px h-5 bg-white/20 my-auto" />
 
-          {/* Botón de Modo Oscuro / Modo Claro con Hugeicons y Animación Circular */}
+          {/* Botón de Modo Oscuro / Claro con Hugeicons */}
           <button
             onClick={toggleThemeWithRipple}
             aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
@@ -239,193 +229,190 @@ export const StaggeredNavbar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Backdrop oscuro para enfocar el menú */}
+      {/* ======================================================== */}
+      {/* CONTENEDOR MAESTRO DE CENTRADO ABSOLUTO (FLEXBOX OVERLAY) */}
+      {/* ======================================================== */}
       <div
         ref={backdropRef}
         onClick={() => setIsOpen(false)}
         style={{ display: 'none' }}
-        className="fixed inset-0 z-40 bg-black/65 backdrop-blur-xs cursor-pointer"
+        className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-start justify-center pt-24 sm:pt-28 pb-10 px-4 cursor-pointer overflow-y-auto"
         aria-hidden="true"
-      />
-
-      {/* BURBUJA DESPLEGABLE HORIZONTAL (DESKTOP) / VERTICAL (MÓVIL) CENTRADA */}
-      <div
-        ref={menuCardRef}
-        style={{ display: 'none' }}
-        className={`fixed z-50 bg-[#F9F6EE] text-[#080808] rounded-[2.5rem] shadow-[0_30px_90px_rgba(0,0,0,0.9)] border border-black/10 select-none overflow-hidden ${
-          isDesktop
-            ? 'top-20 left-1/2 -translate-x-1/2 w-[760px] max-w-[calc(100vw-4rem)] p-8 md:p-10 flex-col md:flex-row gap-8'
-            : 'top-20 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] sm:w-[380px] p-7 flex-col gap-4'
-        }`}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Navegación principal"
       >
-        {/* COLUMNA 1: Enlaces de Navegación Staggered */}
-        <div className="flex-1 flex flex-col justify-between">
-          
-          {/* Header de la columna */}
-          <div className="flex items-center justify-between pb-4 border-b border-black/10">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#0052FF]" />
-              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-black/50 font-mono">
-                NAVEGACIÓN
+        {/* TARJETA DEL MENÚ PERFECTAMENTE CENTRADA */}
+        <div
+          ref={menuCardRef}
+          onClick={(e) => e.stopPropagation()}
+          className={`relative bg-[#F9F6EE] text-[#080808] rounded-[2.5rem] shadow-[0_30px_90px_rgba(0,0,0,0.9)] border border-black/10 select-none overflow-hidden cursor-default w-full ${
+            isDesktop
+              ? 'max-w-[780px] p-8 md:p-10 flex flex-row gap-8'
+              : 'max-w-[390px] p-6 sm:p-7 flex flex-col gap-6'
+          }`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navegación principal y contacto"
+        >
+          {/* COLUMNA 1: Las 5 Secciones de Navegación */}
+          <div className="flex-1 flex flex-col justify-between">
+            
+            {/* Header de la columna */}
+            <div className="flex items-center justify-between pb-4 border-b border-black/10">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#0052FF]" />
+                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-black/50 font-mono">
+                  NAVEGACIÓN
+                </span>
+              </div>
+
+              {/* Botón de cierre rápido */}
+              <button
+                onClick={() => setIsOpen(false)}
+                aria-label="Cerrar ventana"
+                className="w-7 h-7 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            {/* Lista de las 5 secciones */}
+            <ul className="flex flex-col gap-1.5 my-4">
+              {menuItems.map((item, index) => {
+                const isActive = activeItem === item.name;
+                return (
+                  <li key={item.num}>
+                    <a
+                      ref={(el) => {
+                        linksRef.current[index] = el;
+                      }}
+                      href={item.href}
+                      onClick={() => {
+                        setActiveItem(item.name);
+                        setIsOpen(false);
+                      }}
+                      className={`group flex items-center justify-between px-4 py-2.5 rounded-2xl transition-all duration-200 ${
+                        isActive
+                          ? 'bg-black/10 text-black font-black'
+                          : 'hover:bg-black/5 text-black/75 hover:text-black font-extrabold'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-[11px] font-mono font-medium text-black/40 group-hover:text-[#0052FF] transition-colors">
+                          {item.num}
+                        </span>
+                        <span className="text-lg sm:text-xl uppercase tracking-tight font-poppins">
+                          {item.name}
+                        </span>
+                      </div>
+
+                      {item.badge && (
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#00D26A] text-black uppercase tracking-wider shadow-xs">
+                          {item.badge}
+                        </span>
+                      )}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {/* Footer de navegación */}
+            <div className="pt-3 border-t border-black/10 flex items-center justify-between text-[11px] font-mono text-black/50">
+              <span>Mauricio Heredia · 2026</span>
+              <span className="flex items-center gap-1 text-[#0052FF] font-bold">
+                <Sparkles size={12} /> Frontend Craft
               </span>
             </div>
 
-            <button
-              onClick={() => setIsOpen(false)}
-              aria-label="Cerrar menú"
-              className="w-8 h-8 rounded-full bg-black/5 hover:bg-black/15 flex items-center justify-center transition-all duration-200 cursor-pointer hover:rotate-90"
-            >
-              <X size={15} className="text-[#080808]" />
-            </button>
           </div>
 
-          {/* Lista de enlaces */}
-          <nav className="flex flex-col py-3 gap-1">
-            {menuItems.map((item, index) => {
-              const isActive = activeItem === item.name;
-              return (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  ref={(el) => {
-                    linksRef.current[index] = el;
-                  }}
-                  onClick={() => handleItemClick(item.name)}
-                  className={`group flex items-center justify-between py-2 px-3 rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? 'bg-black/5 text-[#080808]'
-                      : 'text-black/60 hover:text-[#080808] hover:bg-black/[0.03]'
-                  }`}
-                >
-                  <div className="flex items-baseline gap-3.5">
-                    <span className="font-mono text-[11px] font-bold text-black/30 group-hover:text-[#0052FF] transition-colors">
-                      {item.num}
-                    </span>
-                    <span className="text-xl sm:text-2xl font-black uppercase tracking-tight transition-transform duration-200 group-hover:translate-x-1.5">
-                      {item.name}
-                    </span>
-                  </div>
-
-                  {item.badge ? (
-                    <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#00D26A] text-black shadow-xs">
-                      {item.badge}
-                    </span>
-                  ) : (
-                    <ArrowUpRight
-                      size={16}
-                      className="opacity-0 -translate-x-1 translate-y-1 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all text-black/40"
-                    />
-                  )}
-                </a>
-              );
-            })}
-          </nav>
-
-          {/* Footer en móvil */}
-          {!isDesktop && (
-            <div className="pt-4 border-t border-black/10 flex items-center justify-between text-xs text-black/70">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#00D26A] animate-pulse" />
-                <span className="text-[11px] font-semibold">Disponible</span>
-              </div>
-              <a
-                href="https://wa.me/3705022130"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#080808] text-[#F9F6EE] text-[10px] font-black uppercase tracking-wider"
-              >
-                <MessageCircle size={11} /> WhatsApp
-              </a>
-            </div>
-          )}
-        </div>
-
-        {/* COLUMNA 2: WIDGET DE CONTACTO, WHATSAPP & LINKEDIN (SOLO EN DESKTOP) */}
-        {isDesktop && (
+          {/* COLUMNA 2: Tarjeta de Contacto Directo Unificada */}
           <div
             ref={connectCardRef}
-            className="w-[300px] bg-[#080808] text-[#F9F6EE] rounded-[2rem] p-6 flex flex-col justify-between shadow-xl border border-black/5"
+            className={`flex flex-col justify-between bg-[#0d0d0d] text-[#F9F6EE] rounded-[2rem] p-6 shadow-xl border border-white/10 ${
+              isDesktop ? 'w-[320px]' : 'w-full'
+            }`}
           >
-            {/* Header del widget */}
-            <div>
-              <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#00D26A] font-bold flex items-center gap-1.5">
-                  <Sparkles size={12} /> Contacto Directo
-                </span>
-                <span className="w-2 h-2 rounded-full bg-[#00D26A] animate-pulse" />
-              </div>
-
-              <div className="py-4">
-                <h4 className="text-base font-black uppercase tracking-tight text-[#F9F6EE]">
-                  Mauricio Heredia
-                </h4>
-                <p className="text-xs text-zinc-400 font-medium mt-0.5">
-                  Frontend & Creative Developer
-                </p>
-                <p className="text-[11px] text-zinc-500 mt-3 leading-relaxed">
-                  Listo para colaborar en proyectos web innovadores con React, Astro, GSAP y Three.js.
-                </p>
-              </div>
+            {/* Header de contacto */}
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <span className="text-[10px] font-mono font-bold tracking-widest uppercase text-[#00D26A] flex items-center gap-1.5">
+                <Sparkles size={12} /> CONTACTO DIRECTO
+              </span>
+              <span className="w-2 h-2 rounded-full bg-[#00D26A] animate-pulse" />
             </div>
 
-            {/* Redes y Accesos directos (WhatsApp, LinkedIn, GitHub, Email) */}
-            <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
-              
-              {/* WhatsApp Burbuja destacada */}
+            {/* Perfil */}
+            <div className="my-3">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-white/20 bg-black">
+                  <img
+                    src="/avatar.jpg"
+                    alt="Mauricio Heredia"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-base font-black uppercase tracking-tight text-white font-poppins">
+                    Mauricio Heredia
+                  </h4>
+                  <p className="text-xs text-zinc-400 font-medium">
+                    Frontend & Creative Dev
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs text-zinc-300 font-light leading-relaxed">
+                Listo para colaborar en proyectos innovadores con React, Astro, GSAP y Three.js.
+              </p>
+            </div>
+
+            {/* Botones de acción rápida */}
+            <div className="flex flex-col gap-2">
               <a
                 href="https://wa.me/3705022130"
                 target="_blank"
                 rel="noreferrer"
-                className="group flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#00D26A] hover:bg-[#00E676] text-black font-black text-xs uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] shadow-md shadow-[#00D26A]/20"
+                className="w-full py-2.5 px-4 rounded-xl bg-[#00D26A] hover:bg-[#00E676] text-black font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all duration-200 shadow-md hover:scale-[1.02]"
               >
-                <div className="flex items-center gap-2">
-                  <MessageCircle size={16} />
-                  <span>WhatsApp</span>
-                </div>
-                <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <span className="flex items-center gap-2">
+                  <MessageCircle size={15} /> WhatsApp
+                </span>
+                <ArrowUpRight size={14} />
               </a>
 
-              {/* LinkedIn */}
               <a
-                href="https://linkedin.com/in/mauricio-heredia"
+                href="https://www.linkedin.com/in/mauricio-heredia-07a829285/"
                 target="_blank"
                 rel="noreferrer"
-                className="group flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-[#0052FF] text-white hover:text-white font-bold text-xs uppercase tracking-wider transition-all duration-300"
+                className="w-full py-2 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-between transition-all duration-200"
               >
-                <div className="flex items-center gap-2">
-                  <Linkedin size={14} />
-                  <span>LinkedIn</span>
-                </div>
-                <ArrowUpRight size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />
+                <span className="flex items-center gap-2">
+                  <Linkedin size={14} /> LinkedIn
+                </span>
+                <ArrowUpRight size={14} />
               </a>
 
-              {/* GitHub & Email row */}
               <div className="grid grid-cols-2 gap-2 mt-1">
                 <a
                   href="https://github.com/mau-jsx"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/10 text-zinc-300 hover:text-white text-[11px] font-bold uppercase tracking-wider transition-colors"
+                  className="py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-mono text-[11px] flex items-center justify-center gap-1.5 transition-colors border border-white/5"
                 >
                   <Github size={13} /> GitHub
                 </a>
 
                 <a
-                  href="mailto:maurih46322945@gmail.com"
-                  className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/10 text-zinc-300 hover:text-white text-[11px] font-bold uppercase tracking-wider transition-colors"
+                  href="mailto:mauricioheredia459@gmail.com"
+                  className="py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-mono text-[11px] flex items-center justify-center gap-1.5 transition-colors border border-white/5"
                 >
                   <Mail size={13} /> Email
                 </a>
               </div>
-
             </div>
 
           </div>
-        )}
 
+        </div>
       </div>
     </>
   );

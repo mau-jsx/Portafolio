@@ -1,52 +1,24 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import StaggeredNavbar from '../components/StaggeredNavbar';
-import AvatarGreeting from '../components/AvatarGreeting';
+import HeroScrollExpand from '../components/HeroScrollExpand';
+import AboutSection from '../components/AboutSection';
 ---
 
-<Layout title="Mauricio Heredia | Portafolio">
-  <!-- Avatar interactivo en la izquierda -->
-  <AvatarGreeting client:load />
-
-  <!-- Navbar centrado y compacto con theme toggle -->
+<Layout title="Mauricio Heredia | Portafolio Creativo 2026">
+  <!-- Navbar maestro unificado centrado con Avatar, Menu y Theme Toggle -->
   <StaggeredNavbar client:load />
 
-  <main id="hero" class="relative z-10 min-h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 pt-28 pb-10 selection:bg-[#00D26A] selection:text-black transition-colors duration-400">
+  <main class="relative z-10 w-full min-h-screen flex flex-col justify-between selection:bg-[#00D26A] selection:text-black transition-colors duration-400">
     
-    <!-- Center Hero -->
-    <section class="max-w-7xl mx-auto w-full my-auto py-8 flex flex-col items-start justify-center">
-      <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.04] mb-8 transition-colors">
-        <span class="w-2 h-2 rounded-full bg-[#00D26A] animate-pulse"></span>
-        <span class="text-xs font-bold tracking-widest uppercase text-zinc-600 dark:text-zinc-300">Creative Frontend Engineer</span>
-      </div>
-      
-      <h1 class="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-[0.88] text-[#080808] dark:text-[#F9F6EE] transition-colors">
-        PORTAFOLIO <br />
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00D26A] via-[#0052FF] to-[#00D26A]">2026</span>
-      </h1>
-      
-      <p class="mt-8 text-zinc-600 dark:text-zinc-400 text-base sm:text-lg md:text-xl max-w-2xl font-light leading-relaxed transition-colors">
-        Construyendo experiencias web interactivas, interfaces de alto impacto visual y animaciones fluidas con GSAP y Three.js.
-      </p>
+    <!-- Hero Section -->
+    <HeroScrollExpand client:load />
 
-      <div class="mt-10 flex flex-wrap items-center gap-4">
-        <a
-          href="#proyectos"
-          class="px-7 py-3.5 rounded-full bg-[#00D26A] hover:bg-[#00E676] text-black font-black text-xs uppercase tracking-wider transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-[#00D26A]/20"
-        >
-          Explorar Proyectos
-        </a>
-        <a
-          href="#contacto"
-          class="px-7 py-3.5 rounded-full border border-black/20 dark:border-white/20 hover:border-black dark:hover:border-white text-black dark:text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/5"
-        >
-          Contactar
-        </a>
-      </div>
-    </section>
+    <!-- Sección 02: Sobre Mí (Apple Bento Grid + Hugeicons + Glassmorphism) -->
+    <AboutSection client:visible />
 
-    <!-- Bottom Footer -->
-    <footer class="max-w-7xl mx-auto w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs text-zinc-500 tracking-wider pt-8 border-t border-black/10 dark:border-white/5 transition-colors">
+    <!-- Footer Moderno -->
+    <footer class="max-w-7xl mx-auto w-full px-6 sm:px-12 md:px-16 py-12 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 text-xs text-zinc-500 tracking-wider border-t border-black/10 dark:border-white/10 transition-colors">
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2">
           <span class="w-3 h-3 rounded-full bg-[#00D26A]" title="Verde Fuerte"></span>
@@ -57,7 +29,9 @@ import AvatarGreeting from '../components/AvatarGreeting';
         <span class="text-zinc-400 dark:text-zinc-600">|</span>
         <span>Astro + React + GSAP + Three.js</span>
       </div>
-      <p class="font-medium text-zinc-600 dark:text-zinc-400">Diseñado & Desarrollado por Mauricio Heredia</p>
+      <p class="font-medium text-zinc-600 dark:text-zinc-400">
+        Diseñado & Desarrollado con 💚 por Mauricio Heredia
+      </p>
     </footer>
 
   </main>
