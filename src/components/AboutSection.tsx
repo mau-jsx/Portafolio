@@ -3,53 +3,53 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { 
-  GraduationCapIcon, 
-  LaptopProgrammingIcon, 
-  AiPaintbrushIcon, 
-  Layers01Icon, 
-  CpuIcon,
-  SparklesIcon,
-  CheckmarkCircle02Icon
+  Medal04Icon, 
+  GraduationCapIcon
 } from '@hugeicons/core-free-icons';
+import { 
+  Download, 
+  ExternalLink, 
+  MapPin,
+  CheckCircle2
+} from 'lucide-react';
+import { SiGithub } from 'react-icons/si';
+import { FaLinkedinIn, FaWhatsapp } from 'react-icons/fa6';
 import { MaskedHeading } from './MaskedHeading';
 
 export const AboutSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const introRef = useRef<HTMLDivElement>(null);
+  const eduRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
     const container = containerRef.current;
-    const cards = cardsRef.current.filter(Boolean);
+    if (!container) return;
 
-    if (!container || cards.length === 0) return;
+    const ctx = gsap.context(() => {
+      const sections = [introRef.current, eduRef.current].filter(Boolean);
 
-    // Animación de entrada escalonada estilo Apple HIG
-    gsap.fromTo(
-      cards,
-      {
-        opacity: 0,
-        y: 40,
-        scale: 0.96,
-      },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.8,
-        stagger: 0.12,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: container,
-          start: 'top 80%',
-          toggleActions: 'play none none reverse',
-        },
-      }
-    );
+      gsap.fromTo(
+        sections,
+        { opacity: 0, y: 35 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: container,
+            start: 'top 85%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+    }, container);
 
     return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      ctx.revert();
     };
   }, []);
 
@@ -57,182 +57,228 @@ export const AboutSection: React.FC = () => {
     <section
       ref={containerRef}
       id="sobre-mi"
-      className="relative w-full min-h-screen py-20 md:py-28 px-4 sm:px-6 md:px-8 select-none flex flex-col justify-center overflow-hidden font-poppins"
+      className="relative w-full min-h-screen py-20 md:py-28 px-4 sm:px-6 md:px-8 select-none font-poppins"
     >
       {/* TÍTULO EDITORIAL CON EFECTO MASKED REVEAL */}
       <MaskedHeading
         tag="02 · Sobre Mí"
-        title="Experiencias con Propósito"
-        subtext="La intersección entre ingeniería técnica de software y sensibilidad visual para la web moderna."
+        title="Ingeniería & Sensibilidad Visual"
+        subtext="Frontend Developer con sólida base técnica, enfocado en crear experiencias interactivas y estéticas para Web y Mobile."
         className="mb-10 sm:mb-14"
       />
 
-      {/* BENTO GRID DE INSPIRACIÓN APPLE (GLASSMORPHISM & ALTA JERARQUÍA) */}
-      <div className="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6">
-        
-        {/* ======================================================== */}
-        {/* TARJETA 1: HERO STORY (2/3 DEL ANCHO EN DESKTOP)          */}
-        {/* ======================================================== */}
-        <div
-          ref={(el) => {
-            cardsRef.current[0] = el;
-          }}
-          className="md:col-span-8 bg-white/70 dark:bg-[#0d0d0d]/80 text-[#080808] dark:text-[#F9F6EE] backdrop-blur-2xl rounded-[2rem] sm:rounded-[2.5rem] p-7 sm:p-9 border border-black/10 dark:border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.7)] flex flex-col justify-between gap-6 transition-all duration-300 hover:border-black/20 dark:hover:border-white/30"
-        >
-          {/* Header de la tarjeta */}
-          <div className="flex items-center justify-between">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10 text-xs font-mono font-bold text-[#0052FF] dark:text-[#60A5FA]">
-              <HugeiconsIcon icon={SparklesIcon} size={14} />
-              <span>PERFIL & VOCACIÓN</span>
-            </div>
-
-            <span className="text-xs font-mono text-black/50 dark:text-zinc-500 font-semibold">
-              Fullstack · Frontend Focused
-            </span>
-          </div>
-
-          {/* Cuerpo principal */}
-          <div>
-            <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-[#080808] dark:text-white leading-[1.1] font-poppins">
-              De la lógica del código a la <br />
-              <span className="text-[#00D26A]">sensibilidad estética.</span>
-            </h3>
-
-            <p className="mt-4 text-zinc-700 dark:text-zinc-300 text-sm sm:text-base font-light leading-relaxed">
-              Soy <strong className="font-bold text-black dark:text-white">Desarrollador de Software Multiplataforma</strong> y <strong className="font-bold text-black dark:text-white">Técnico en Informática</strong> (recibido en 2023). Cuento con una base técnica sólida para construir soluciones de punta a punta como desarrollador fullstack, pero mi auténtica pasión reside en el <strong className="font-bold text-[#00D26A]">Frontend</strong>: transformar sistemas complejos en interfaces intuitivas, elegantes y con animaciones que despiertan emociones.
-            </p>
-          </div>
-
-          {/* Badges de Formación y Enfoque */}
-          <div className="flex flex-wrap gap-2 pt-2 border-t border-black/10 dark:border-white/10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/10 text-xs font-mono font-medium">
-              <HugeiconsIcon icon={GraduationCapIcon} size={14} color="#00D26A" />
-              <span>Técnico en Informática (2023)</span>
-            </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/10 text-xs font-mono font-medium">
-              <HugeiconsIcon icon={LaptopProgrammingIcon} size={14} color="#0052FF" />
-              <span>Dev. Software Multiplataforma</span>
-            </div>
-          </div>
-        </div>
+      <div className="max-w-6xl mx-auto w-full flex flex-col gap-10 sm:gap-12">
 
         {/* ======================================================== */}
-        {/* TARJETA 2: ENFOQUE VISUAL & CRAFT (1/3 EN DESKTOP)        */}
+        {/* 1. TARJETA DE PRESENTACIÓN + GET IN TOUCH CARDS          */}
         {/* ======================================================== */}
         <div
-          ref={(el) => {
-            cardsRef.current[1] = el;
-          }}
-          className="md:col-span-4 bg-white/70 dark:bg-[#0d0d0d]/80 text-[#080808] dark:text-[#F9F6EE] backdrop-blur-2xl rounded-[2rem] sm:rounded-[2.5rem] p-7 sm:p-8 border border-black/10 dark:border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.7)] flex flex-col justify-between gap-5 transition-all duration-300 hover:border-black/20 dark:hover:border-white/30"
+          ref={introRef}
+          className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch"
         >
-          <div className="w-12 h-12 rounded-2xl bg-[#00D26A]/15 text-[#00D26A] flex items-center justify-center border border-[#00D26A]/30">
-            <HugeiconsIcon icon={AiPaintbrushIcon} size={24} />
-          </div>
-
-          <div>
-            <h4 className="text-xl font-bold uppercase tracking-tight text-[#080808] dark:text-white font-poppins">
-              Obsesión por la Estética
-            </h4>
-            <p className="mt-2.5 text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm font-light leading-relaxed">
-              No solo construyo funciones; cuido el espaciado, la tipografía, el contraste y la física del movimiento con GSAP y Three.js para crear productos memorables.
-            </p>
-          </div>
-
-          <div className="space-y-1.5 pt-3 border-t border-black/10 dark:border-white/10 text-xs font-mono">
-            <div className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300">
-              <HugeiconsIcon icon={CheckmarkCircle02Icon} size={14} color="#00D26A" />
-              <span>Micro-interacciones a 60 FPS</span>
+          {/* Tarjeta de Presentación / Bio Humana y Auténtica */}
+          <div className="lg:col-span-7 bg-white/80 dark:bg-[#0d0d0d]/90 text-[#080808] dark:text-[#F9F6EE] backdrop-blur-2xl rounded-[2.5rem] p-7 sm:p-9 border border-black/10 dark:border-white/15 shadow-xl flex flex-col sm:flex-row gap-6 items-center">
+            {/* Foto de Mauricio */}
+            <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-[2rem] overflow-hidden border-2 border-black/10 dark:border-white/20 shrink-0 shadow-lg bg-black">
+              <img
+                src="/avatar.jpg"
+                alt="Mauricio Wilfredo Heredia"
+                className="w-full h-full object-cover"
+              />
             </div>
-            <div className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300">
-              <HugeiconsIcon icon={CheckmarkCircle02Icon} size={14} color="#00D26A" />
-              <span>Diseño Responsive Fluido</span>
-            </div>
-          </div>
-        </div>
 
-        {/* ======================================================== */}
-        {/* TARJETA 3: ARQUITECTURA & MULTIPLATAFORMA (1/3 EN DESKTOP) */}
-        {/* ======================================================== */}
-        <div
-          ref={(el) => {
-            cardsRef.current[2] = el;
-          }}
-          className="md:col-span-4 bg-white/70 dark:bg-[#0d0d0d]/80 text-[#080808] dark:text-[#F9F6EE] backdrop-blur-2xl rounded-[2rem] sm:rounded-[2.5rem] p-7 sm:p-8 border border-black/10 dark:border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.7)] flex flex-col justify-between gap-5 transition-all duration-300 hover:border-black/20 dark:hover:border-white/30"
-        >
-          <div className="w-12 h-12 rounded-2xl bg-[#0052FF]/15 text-[#0052FF] flex items-center justify-center border border-[#0052FF]/30">
-            <HugeiconsIcon icon={Layers01Icon} size={24} />
-          </div>
-
-          <div>
-            <h4 className="text-xl font-bold uppercase tracking-tight text-[#080808] dark:text-white font-poppins">
-              Arquitectura Limpia
-            </h4>
-            <p className="mt-2.5 text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm font-light leading-relaxed">
-              Estructuras modulares y componentes escalables en React y Astro, optimizados para velocidad de carga instantánea y SEO de alta fidelidad.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 pt-3 border-t border-black/10 dark:border-white/10">
-            {['React', 'Astro', 'TypeScript', 'Tailwind'].map((tech) => (
-              <span
-                key={tech}
-                className="px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 text-[10px] font-mono font-bold"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* ======================================================== */}
-        {/* TARJETA 4: PILARES & TRAYECTORIA EN NÚMEROS (2/3 EN DESKTOP) */}
-        {/* ======================================================== */}
-        <div
-          ref={(el) => {
-            cardsRef.current[3] = el;
-          }}
-          className="md:col-span-8 bg-white/70 dark:bg-[#0d0d0d]/80 text-[#080808] dark:text-[#F9F6EE] backdrop-blur-2xl rounded-[2rem] sm:rounded-[2.5rem] p-7 sm:p-8 border border-black/10 dark:border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.7)] flex flex-col justify-between gap-6 transition-all duration-300 hover:border-black/20 dark:hover:border-white/30"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#00D26A] flex items-center gap-1.5">
-              <HugeiconsIcon icon={CpuIcon} size={15} /> PILARES DE TRABAJO
-            </span>
-            <span className="text-xs font-mono text-black/40 dark:text-zinc-500">2023 — 2026</span>
-          </div>
-
-          {/* 3 Métricas Destacadas */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-2 text-center sm:text-left">
-            <div className="p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5">
-              <div className="text-3xl font-black font-poppins text-black dark:text-white">
-                +3 Años
+            {/* Texto de Introducción y Biografía Auténtica */}
+            <div className="flex-1 space-y-2.5 text-center sm:text-left">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/5 dark:bg-white/10 text-xs font-mono font-bold text-[#0052FF] dark:text-[#60A5FA]">
+                <MapPin size={13} /> Formosa Capital, Argentina
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-light">
-                Trayectoria y evolución técnica continua.
-              </p>
-            </div>
 
-            <div className="p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5">
-              <div className="text-3xl font-black font-poppins text-[#0052FF] dark:text-[#60A5FA]">
-                100%
-              </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-light">
-                Enfoque en interacción y detalle visual.
-              </p>
-            </div>
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tight text-black dark:text-white font-poppins">
+                Mauricio Wilfredo Heredia
+              </h3>
 
-            <div className="p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5">
-              <div className="text-3xl font-black font-poppins text-[#00D26A]">
-                60 FPS
-              </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-light">
-                Rendimiento suave en cada animación.
+              <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 font-light leading-relaxed">
+                Hola, soy Desarrollador de Software y Técnico en Informática. Me considero un desarrollador fullstack con una profunda pasión y dedicación por el <strong className="text-black dark:text-white font-bold">Frontend y el diseño de interfaces</strong>. Me encanta transformar ideas complejas en experiencias web y móviles intuitivas, estéticas y vivas, donde cada interacción y detalle visual está pensado para conectar de forma natural con las personas.
               </p>
             </div>
           </div>
 
-          <p className="text-xs font-mono text-black/60 dark:text-zinc-400">
-            Formación sólida + pasión artesanal por el diseño de interfaces web modernas.
-          </p>
+          {/* Tarjetas de Acción Rápida / Get in Touch */}
+          <div className="lg:col-span-5 grid grid-cols-2 gap-3.5">
+            {/* WhatsApp Card */}
+            <a
+              href="https://wa.me/3705022130"
+              target="_blank"
+              rel="noreferrer"
+              className="p-5 rounded-[2rem] bg-[#25D366] text-black font-poppins flex flex-col justify-between gap-4 shadow-lg hover:scale-[1.03] transition-transform duration-200"
+            >
+              <div className="flex items-center justify-between">
+                <FaWhatsapp size={28} />
+                <ExternalLink size={16} />
+              </div>
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider block opacity-75">
+                  Chat Directo
+                </span>
+                <span className="text-sm font-black uppercase tracking-tight block">
+                  WhatsApp
+                </span>
+              </div>
+            </a>
+
+            {/* LinkedIn Card */}
+            <a
+              href="https://www.linkedin.com/in/mauricio-heredia-07a829285/"
+              target="_blank"
+              rel="noreferrer"
+              className="p-5 rounded-[2rem] bg-[#0A66C2] text-white font-poppins flex flex-col justify-between gap-4 shadow-lg hover:scale-[1.03] transition-transform duration-200"
+            >
+              <div className="flex items-center justify-between">
+                <FaLinkedinIn size={26} />
+                <ExternalLink size={16} />
+              </div>
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider block text-white/75">
+                  Conectar
+                </span>
+                <span className="text-sm font-black uppercase tracking-tight block">
+                  LinkedIn
+                </span>
+              </div>
+            </a>
+
+            {/* GitHub Card */}
+            <a
+              href="https://github.com/mau-jsx"
+              target="_blank"
+              rel="noreferrer"
+              className="p-5 rounded-[2rem] bg-[#181717] text-white font-poppins flex flex-col justify-between gap-4 shadow-lg hover:scale-[1.03] transition-transform duration-200 border border-white/10"
+            >
+              <div className="flex items-center justify-between">
+                <SiGithub size={26} />
+                <ExternalLink size={16} />
+              </div>
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider block text-white/75">
+                  Código
+                </span>
+                <span className="text-sm font-black uppercase tracking-tight block">
+                  GitHub
+                </span>
+              </div>
+            </a>
+
+            {/* Descargar CV PDF Card */}
+            <a
+              href="/CV_Mauricio_Heredia_Frontend_Developer.pdf"
+              download="CV_Mauricio_Heredia_Frontend_Developer.pdf"
+              className="p-5 rounded-[2rem] bg-white dark:bg-white text-black font-poppins flex flex-col justify-between gap-4 shadow-lg hover:scale-[1.03] transition-transform duration-200 cursor-pointer border border-black/10"
+            >
+              <div className="flex items-center justify-between">
+                <Download size={26} />
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-black text-white">
+                  PDF
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider block opacity-70">
+                  Descargar
+                </span>
+                <span className="text-sm font-black uppercase tracking-tight block">
+                  Curriculum
+                </span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        {/* ======================================================== */}
+        {/* 2. EDUCACIÓN OFICIAL: 2 TARJETAS BLANCAS CON Medal04Icon */}
+        {/* ======================================================== */}
+        <div
+          ref={eduRef}
+          className="w-full flex flex-col gap-6"
+        >
+          {/* Header de Educación */}
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-2">
+              <HugeiconsIcon icon={GraduationCapIcon} size={22} color="#0052FF" />
+              <h4 className="text-lg sm:text-xl font-black uppercase tracking-tight text-black dark:text-white font-poppins">
+                Educación & Titulaciones Oficiales
+              </h4>
+            </div>
+
+            <span className="text-xs font-mono text-zinc-500">2016 — 2025</span>
+          </div>
+
+          {/* 2 Tarjetas Blancas Redondeadas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Tarjeta 1: Técnico en Informática */}
+            <div className="bg-white text-[#080808] rounded-[2.2rem] p-7 sm:p-8 border border-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.12)] flex flex-col justify-between gap-5 transition-transform duration-200 hover:scale-[1.02]">
+              <div className="flex items-center justify-between">
+                <div className="w-13 h-13 rounded-2xl bg-[#00D26A]/15 text-[#008a44] flex items-center justify-center shadow-xs border border-[#00D26A]/30">
+                  <HugeiconsIcon icon={Medal04Icon} size={30} color="#008a44" />
+                </div>
+
+                <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-black/5 text-black uppercase tracking-wider">
+                  2016 — 2023 · Graduado
+                </span>
+              </div>
+
+              <div>
+                <h5 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-black font-poppins">
+                  Técnico en Informática
+                </h5>
+                <p className="text-xs font-mono font-bold text-[#0052FF] mt-1">
+                  EPET N° 7 Vicente Arcadio Salemi
+                </p>
+                <p className="text-xs text-zinc-600 font-light mt-2.5 leading-relaxed">
+                  Formación técnica con bases profundas en lógica algorítmica, arquitectura de computadoras, redes LAN y soporte de sistemas.
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-black/10 flex items-center justify-between text-[11px] font-mono text-zinc-500">
+                <span className="flex items-center gap-1 text-[#008a44] font-bold">
+                  <CheckCircle2 size={13} /> Título Oficial
+                </span>
+                <span>Formosa, Argentina</span>
+              </div>
+            </div>
+
+            {/* Tarjeta 2: Técnico Superior en Desarrollo de Software Multiplataforma */}
+            <div className="bg-white text-[#080808] rounded-[2.2rem] p-7 sm:p-8 border border-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.12)] flex flex-col justify-between gap-5 transition-transform duration-200 hover:scale-[1.02]">
+              <div className="flex items-center justify-between">
+                <div className="w-13 h-13 rounded-2xl bg-[#0052FF]/15 text-[#0052FF] flex items-center justify-center shadow-xs border border-[#0052FF]/30">
+                  <HugeiconsIcon icon={Medal04Icon} size={30} color="#0052FF" />
+                </div>
+
+                <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-black/5 text-black uppercase tracking-wider">
+                  2024 — 2025 · Graduado
+                </span>
+              </div>
+
+              <div>
+                <h5 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-black font-poppins">
+                  Técnico Superior en Desarrollo de Software Multiplataforma
+                </h5>
+                <p className="text-xs font-mono font-bold text-[#0052FF] mt-1">
+                  Instituto Politécnico Formosa
+                </p>
+                <p className="text-xs text-zinc-600 font-light mt-2.5 leading-relaxed">
+                  Especialización superior en desarrollo web fullstack, aplicaciones móviles multiplataforma nativas/híbridas y arquitecturas de software modernas.
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-black/10 flex items-center justify-between text-[11px] font-mono text-zinc-500">
+                <span className="flex items-center gap-1 text-[#0052FF] font-bold">
+                  <CheckCircle2 size={13} /> Título Superior
+                </span>
+                <span>Formosa, Argentina</span>
+              </div>
+            </div>
+
+          </div>
         </div>
 
       </div>

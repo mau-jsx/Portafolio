@@ -1,22 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { Menu, X, ArrowUpRight, Github, Linkedin, MessageCircle, Mail, Sparkles } from 'lucide-react';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Moon01Icon, Sun02Icon } from '@hugeicons/core-free-icons';
+import { 
+  Moon01Icon, 
+  Sun02Icon, 
+  SparklesIcon, 
+  ArrowUpRight01Icon,
+  SentIcon,
+  CheckmarkCircle02Icon
+} from '@hugeicons/core-free-icons';
+import { Menu, X, ArrowUpRight, Copy, Check, Sparkles } from 'lucide-react';
 
 interface MenuItem {
-  num: string;
   name: string;
+  num: string;
   href: string;
   badge?: string;
 }
 
 const menuItems: MenuItem[] = [
-  { num: '01', name: 'Inicio', href: '#hero' },
-  { num: '02', name: 'Sobre mí', href: '#sobre-mi' },
-  { num: '03', name: 'Portafolio', href: '#portafolio' },
-  { num: '04', name: 'Experiencia y Formación', href: '#experiencia' },
-  { num: '05', name: 'Contacto', href: '#contacto', badge: 'Online' },
+  { name: 'Inicio', num: '01', href: '#hero' },
+  { name: 'Sobre mí', num: '02', href: '#sobre-mi', badge: 'Perfil' },
+  { name: 'Portafolio', num: '03', href: '#portafolio' },
+  { name: 'Experiencia y Formación', num: '04', href: '#sobre-mi' },
+  { name: 'Contacto', num: '05', href: '#sobre-mi' },
 ];
 
 export const StaggeredNavbar: React.FC = () => {
@@ -24,12 +31,13 @@ export const StaggeredNavbar: React.FC = () => {
   const [activeItem, setActiveItem] = useState('Inicio');
   const [isDesktop, setIsDesktop] = useState(false);
   const [isDark, setIsDark] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   const menuCardRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
   const linksRef = useRef<(HTMLAnchorElement | null)[]>([]);
   const connectCardRef = useRef<HTMLDivElement>(null);
-  const rippleOverlayRef = useRef<HTMLDivElement>(null);
+  const isMountedRef = useRef(false);
 
   // Inicializar estado de tema y responsive
   useEffect(() => {
@@ -55,10 +63,12 @@ export const StaggeredNavbar: React.FC = () => {
     return () => window.removeEventListener('resize', checkDesktop);
   }, []);
 
-  // Animación Circular Dinámica de Pantalla Completa (Circular Ripple Effect)
-  const toggleThemeWithRipple = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const rippleOverlayRef = useRef<HTMLDivElement>(null);
+
+  // Cambio de tema con efecto circular expansivo (Circular Ripple Effect)
+  const toggleTheme = (e: React.MouseEvent<HTMLButtonElement>) => {
     const nextDark = !isDark;
-    setIsDark(nextDark);
+    const overlay = rippleOverlayRef.current;
 
     const buttonRect = e.currentTarget.getBoundingClientRect();
     const x = buttonRect.left + buttonRect.width / 2;
@@ -69,6 +79,9 @@ export const StaggeredNavbar: React.FC = () => {
       Math.max(y, window.innerHeight - y)
     );
 
+    const targetBg = nextDark ? '#080808' : '#F9F6EE';
+
+    // Inmediatamente conmutar el tema del documento y estado de React
     if (nextDark) {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
@@ -78,11 +91,10 @@ export const StaggeredNavbar: React.FC = () => {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
+    setIsDark(nextDark);
 
-    const overlay = rippleOverlayRef.current;
     if (overlay) {
-      const newBgColor = nextDark ? '#080808' : '#F9F6EE';
-      overlay.style.backgroundColor = newBgColor;
+      overlay.style.backgroundColor = targetBg;
       overlay.style.display = 'block';
 
       gsap.fromTo(
@@ -93,7 +105,7 @@ export const StaggeredNavbar: React.FC = () => {
         },
         {
           clipPath: `circle(${maxRadius}px at ${x}px ${y}px)`,
-          duration: 0.6,
+          duration: 0.75,
           ease: 'power2.out',
           onComplete: () => {
             overlay.style.display = 'none';
@@ -103,8 +115,21 @@ export const StaggeredNavbar: React.FC = () => {
     }
   };
 
-  // Animación de apertura y cierre del menú con GSAP en el contenedor centrado
+  // Copiar email al portapapeles
+  const copyEmail = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText('mauricioheredia46@gmail.com');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Animación de apertura y cierre del menú con GSAP
   useEffect(() => {
+    if (!isMountedRef.current) {
+      isMountedRef.current = true;
+      return;
+    }
+
     const card = menuCardRef.current;
     const backdrop = backdropRef.current;
     const items = linksRef.current.filter(Boolean);
@@ -114,24 +139,25 @@ export const StaggeredNavbar: React.FC = () => {
 
     if (isOpen) {
       backdrop.style.display = 'flex';
+      gsap.killTweensOf([backdrop, card, items, connect]);
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-      tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0);
+      tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.25 }, 0);
 
       tl.fromTo(
         card,
         {
           opacity: 0,
-          scale: 0.88,
-          y: -20,
+          scale: 0.9,
+          y: -15,
           transformOrigin: 'top center',
         },
         {
           opacity: 1,
           scale: 1,
           y: 0,
-          duration: 0.45,
+          duration: 0.35,
           ease: 'back.out(1.2)',
         },
         0
@@ -140,21 +166,23 @@ export const StaggeredNavbar: React.FC = () => {
       if (items.length > 0) {
         tl.fromTo(
           items,
-          { opacity: 0, y: 15 },
-          { opacity: 1, y: 0, duration: 0.35, stagger: 0.05, ease: 'power3.out' },
-          '-=0.25'
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, duration: 0.25, stagger: 0.04, ease: 'power2.out' },
+          '-=0.2'
         );
       }
 
       if (connect && isDesktop) {
         tl.fromTo(
           connect,
-          { opacity: 0, scale: 0.95, y: 15 },
-          { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: 'power3.out' },
-          '-=0.25'
+          { opacity: 0, scale: 0.95, y: 10 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'power2.out' },
+          '-=0.2'
         );
       }
     } else {
+      gsap.killTweensOf([backdrop, card]);
+
       const tl = gsap.timeline({
         defaults: { ease: 'power2.in' },
         onComplete: () => {
@@ -163,13 +191,13 @@ export const StaggeredNavbar: React.FC = () => {
       });
 
       tl.to(backdrop, { opacity: 0, duration: 0.2 }, 0);
-      tl.to(card, { opacity: 0, scale: 0.9, y: -10, duration: 0.2 }, 0);
+      tl.to(card, { opacity: 0, scale: 0.92, y: -10, duration: 0.2 }, 0);
     }
   }, [isOpen, isDesktop]);
 
   return (
     <>
-      {/* CAPA DE ANIMACIÓN CIRCULAR DE CAMBIO DE TEMA */}
+      {/* CAPA DE ANIMACIÓN CIRCULAR EN EL FONDO (DETRÁS DEL CONTENIDO) */}
       <div
         ref={rippleOverlayRef}
         style={{ display: 'none' }}
@@ -185,6 +213,7 @@ export const StaggeredNavbar: React.FC = () => {
           
           {/* Botón Trigger del Menú con Avatar Integrado */}
           <button
+            type="button"
             onClick={() => setIsOpen((prev) => !prev)}
             aria-expanded={isOpen}
             aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú de navegación y contacto'}
@@ -212,9 +241,10 @@ export const StaggeredNavbar: React.FC = () => {
           {/* Separador vertical */}
           <div className="w-px h-5 bg-white/20 my-auto" />
 
-          {/* Botón de Modo Oscuro / Claro con Hugeicons */}
+          {/* Botón de Modo Oscuro / Claro */}
           <button
-            onClick={toggleThemeWithRipple}
+            type="button"
+            onClick={toggleTheme}
             aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
             className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-300 hover:text-white hover:bg-white/10 transition-colors duration-200 cursor-pointer"
             title={isDark ? 'Modo Claro' : 'Modo Oscuro'}
@@ -266,6 +296,7 @@ export const StaggeredNavbar: React.FC = () => {
 
               {/* Botón de cierre rápido */}
               <button
+                type="button"
                 onClick={() => setIsOpen(false)}
                 aria-label="Cerrar ventana"
                 className="w-7 h-7 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center transition-colors cursor-pointer"
@@ -361,53 +392,50 @@ export const StaggeredNavbar: React.FC = () => {
               </div>
 
               <p className="text-xs text-zinc-300 font-light leading-relaxed">
-                Listo para colaborar en proyectos innovadores con React, Astro, GSAP y Three.js.
+                Disponible para proyectos freelance, consultoría y puestos frontend.
               </p>
             </div>
 
-            {/* Botones de acción rápida */}
-            <div className="flex flex-col gap-2">
+            {/* Acciones de Contacto */}
+            <div className="space-y-2.5 pt-3 border-t border-white/10">
+              
+              {/* Botón WhatsApp */}
               <a
                 href="https://wa.me/3705022130"
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-2.5 px-4 rounded-xl bg-[#00D26A] hover:bg-[#00E676] text-black font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all duration-200 shadow-md hover:scale-[1.02]"
+                className="w-full py-2.5 px-4 rounded-xl bg-[#00D26A] hover:bg-[#00E676] text-black font-bold text-xs uppercase tracking-wider text-center transition-all duration-300 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-98 shadow-md"
               >
-                <span className="flex items-center gap-2">
-                  <MessageCircle size={15} /> WhatsApp
-                </span>
-                <ArrowUpRight size={14} />
+                <span>Escribir por WhatsApp</span>
+                <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} />
               </a>
 
-              <a
-                href="https://www.linkedin.com/in/mauricio-heredia-07a829285/"
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-2 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-between transition-all duration-200"
+              {/* Botón Copiar Email */}
+              <button
+                type="button"
+                onClick={copyEmail}
+                className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider text-center transition-all duration-300 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-98 border border-white/15 cursor-pointer"
               >
-                <span className="flex items-center gap-2">
-                  <Linkedin size={14} /> LinkedIn
-                </span>
-                <ArrowUpRight size={14} />
-              </a>
+                {copied ? (
+                  <>
+                    <Check size={14} className="text-[#00D26A]" />
+                    <span className="text-[#00D26A]">¡Email Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={14} />
+                    <span>Copiar Email</span>
+                  </>
+                )}
+              </button>
 
-              <div className="grid grid-cols-2 gap-2 mt-1">
-                <a
-                  href="https://github.com/mau-jsx"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-mono text-[11px] flex items-center justify-center gap-1.5 transition-colors border border-white/5"
-                >
-                  <Github size={13} /> GitHub
-                </a>
+            </div>
 
-                <a
-                  href="mailto:mauricioheredia459@gmail.com"
-                  className="py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-mono text-[11px] flex items-center justify-center gap-1.5 transition-colors border border-white/5"
-                >
-                  <Mail size={13} /> Email
-                </a>
-              </div>
+            {/* Footer Formosa */}
+            <div className="pt-3 text-center">
+              <span className="text-[10px] font-mono text-zinc-500">
+                Formosa Capital, Argentina · GMT-3
+              </span>
             </div>
 
           </div>

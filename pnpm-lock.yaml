@@ -57,7 +57,7 @@ importers:
         specifier: ^19.2.3
         version: 19.2.8(react@19.2.8)
       react-icons:
-        specifier: ^5.5.0
+        specifier: ^5.7.0
         version: 5.7.0(react@19.2.8)
       split-type:
         specifier: ^0.3.4

@@ -29,53 +29,53 @@ export const MaskedHeading: React.FC<MaskedHeadingProps> = ({
     const textMask = textMaskRef.current;
     const subtextEl = subtextRef.current;
 
-    if (!container || !textMask) return;
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse',
+        },
+      });
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: container,
-        start: 'top 85%',
-        toggleActions: 'play none none reverse',
-      },
-    });
+      if (tagEl) {
+        tl.fromTo(
+          tagEl,
+          { opacity: 0, y: 15 },
+          { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }
+        );
+      }
 
-    if (tagEl) {
+      // Efecto Masked Reveal con GSAP
       tl.fromTo(
-        tagEl,
-        { opacity: 0, y: 15 },
-        { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }
+        textMask,
+        {
+          clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)',
+          y: 40,
+          opacity: 0,
+        },
+        {
+          clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+          y: 0,
+          opacity: 1,
+          duration: 0.9,
+          ease: 'power4.out',
+        },
+        '-=0.3'
       );
-    }
 
-    // Efecto Masked Reveal con GSAP
-    tl.fromTo(
-      textMask,
-      {
-        clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)',
-        y: 40,
-        opacity: 0,
-      },
-      {
-        clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-        y: 0,
-        opacity: 1,
-        duration: 0.9,
-        ease: 'power4.out',
-      },
-      '-=0.3'
-    );
-
-    if (subtextEl) {
-      tl.fromTo(
-        subtextEl,
-        { opacity: 0, y: 15 },
-        { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
-        '-=0.5'
-      );
-    }
+      if (subtextEl) {
+        tl.fromTo(
+          subtextEl,
+          { opacity: 0, y: 15 },
+          { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
+          '-=0.5'
+        );
+      }
+    }, container);
 
     return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      ctx.revert();
     };
   }, []);
 
