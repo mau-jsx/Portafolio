@@ -1,42 +1,87 @@
 ---
 import '../styles/global.css';
+import { profile } from '../data/site';
 
 interface Props {
   title?: string;
   description?: string;
 }
 
-const { 
-  title = "Mauricio Heredia | Frontend Developer", 
-  description = "Portafolio de Mauricio Heredia - Desarrollador Frontend" 
+const {
+  title = `${profile.name} — ${profile.role}`,
+  description = `${profile.role} especializado en ${profile.specialty}. Angular, Next.js, React, Astro y TypeScript, con animación en GSAP. ${profile.location}, remoto.`,
 } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://mauricioheredia.dev');
+const ogImage = new URL('/og.jpg', canonical);
 ---
 
 <!doctype html>
-<html lang="es" class="scroll-smooth antialiased">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
+
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={profile.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="es_AR" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@1,6..72,300..500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: profile.fullName,
+        jobTitle: profile.role,
+        url: canonical.href,
+        address: { '@type': 'PostalAddress', addressLocality: 'Formosa', addressCountry: 'AR' },
+        sameAs: ['https://github.com/mau-jsx', 'https://www.linkedin.com/in/mauricio-heredia-75b497336'],
+      })}
+    />
+
     <script is:inline>
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
-        document.documentElement.classList.add('light');
-        document.documentElement.classList.remove('dark');
-      } else {
-        document.documentElement.classList.add('dark');
-        document.documentElement.classList.remove('light');
-      }
+      // Antes de pintar: evita el flash de tema equivocado.
+      (function () {
+        var saved = localStorage.getItem('theme');
+        var dark = saved ? saved === 'dark' : !window.matchMedia('(prefers-color-scheme: light)').matches;
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      })();
     </script>
   </head>
-  <body class="min-h-screen bg-[#F9F6EE] text-[#080808] dark:bg-[#080808] dark:text-[#F9F6EE] selection:bg-[#00D26A] selection:text-black transition-colors duration-300">
+
+  <body>
+    <a
+      href="#contenido"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-[var(--fg)] focus:px-5 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-[var(--bg)]"
+    >
+      Saltar al contenido
+    </a>
     <slot />
   </body>
 </html>
