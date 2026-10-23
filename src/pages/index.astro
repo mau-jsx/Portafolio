@@ -6,16 +6,15 @@ import SmoothScroll from '../components/SmoothScroll';
 import Nav from '../components/Nav';
 import Hero from '../components/Hero';
 import Profile from '../components/Profile';
-import Recognition from '../components/Recognition';
-import Experience from '../components/Experience';
-import Projects from '../components/Projects';
+import Work from '../components/Work';
 import Contact from '../components/Contact';
-import { profile, links } from '../data/site';
+import { profile, links, work } from '../data/site';
 import fondo from '../assets/fondo.jpg';
 import retrato from '../assets/avatar-humation.png';
 import fondoLetra from '../assets/fondo-letra.jpg';
 import capturaFullstack from '../assets/fullstack.jpg';
 import capturaFrontend from '../assets/frotend.jpg';
+import fondoTrabajo from '../assets/fondo-trabajo.jpg';
 
 // La escena WebGL consume una textura optimizada, no el JPG original.
 const sceneImage = await getImage({ src: fondo, width: 1600, format: 'webp', quality: 76 });
@@ -45,6 +44,16 @@ const buildShot = async (src: ImageMetadata) => {
 const shotFullstack = await buildShot(capturaFullstack);
 const shotFrontend = await buildShot(capturaFrontend);
 
+// Fondo de las tarjetas de Trabajo: es vertical, como la tarjeta misma.
+const coverWidths = [480, 736];
+const coverSources = await Promise.all(
+  coverWidths.map((width) => getImage({ src: fondoTrabajo, width, format: 'webp', quality: 80 })),
+);
+const workCover = {
+  src: coverSources[0].src,
+  srcSet: coverSources.map((v, i) => `${v.src} ${coverWidths[i]}w`).join(', '),
+};
+
 // Retrato de la tarjeta de perfil, en dos densidades.
 const portraitWidths = [240, 480];
 const portraitSources = await Promise.all(
@@ -66,6 +75,33 @@ const foreground = {
   src: ground[1].src,
   srcSet: ground.map((v, i) => `${v.src} ${groundWidths[i]}w`).join(', '),
 };
+
+/*
+ * Datos vivos de GitHub, tomados al compilar y no en el navegador: el visitante
+ * no paga la latencia ni se topa con el límite de peticiones anónimas, y si
+ * GitHub no contesta el sitio se construye igual, sólo sin estos datos.
+ */
+const repoSlugs = [...new Set(
+  work
+    .map((entry) => entry.href?.match(/github\.com\/([^/]+\/[^/?#]+)/)?.[1])
+    .filter((slug): slug is string => Boolean(slug)),
+)];
+
+const repos: Record<string, { pushedAt: string }> = {};
+
+await Promise.all(
+  repoSlugs.map(async (slug) => {
+    try {
+      const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'portafolio' };
+      const meta = await fetch(`https://api.github.com/repos/${slug}`, { headers }).then((r) =>
+        r.json(),
+      );
+      if (meta?.pushed_at) repos[slug] = { pushedAt: meta.pushed_at };
+    } catch {
+      // Sin red o con la API caída, la entrada se muestra sin datos vivos.
+    }
+  }),
+);
 
 const year = new Date().getFullYear();
 ---
@@ -90,11 +126,8 @@ const year = new Date().getFullYear();
       client:load
     />
     <Profile portrait={portrait} client:visible />
-    <Recognition client:visible />
-    <Experience client:visible />
-    {/* client:load a propósito: el pin horizontal debe existir antes de
-        que el usuario llegue, o la altura del documento salta al hidratar. */}
-    <Projects client:load />
+    {/* client:load: la sección se pinnea y tiene que existir antes de llegar. */}
+    <Work repos={repos} portrait={portrait} cover={workCover} client:load />
     <Contact closing={foreground} client:visible />
   </main>
 

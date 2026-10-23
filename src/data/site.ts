@@ -32,7 +32,7 @@ export const getMailto = () => `mailto:${getEmail()}`;
 
 export const links = {
   github: 'https://github.com/mau-jsx',
-  linkedin: 'https://www.linkedin.com/in/mauricio-heredia-75b497336',
+  linkedin: 'https://www.linkedin.com/in/mauricio-heredia-dev',
   instagram: 'https://www.instagram.com/mau.jsx/',
   whatsapp: `https://wa.me/${profile.phoneIntl}`,
   cv: '/CV-Mauricio-Heredia-Frontend.pdf',
@@ -75,246 +75,187 @@ export const stack: StackGroup[] = [
   },
 ];
 
-export interface TimelineEntry {
-  /** Mes de inicio en dos dígitos y su nombre. */
-  month: string;
-  monthName: string;
-  title: string;
-  subtitle: string;
-  tag?: string;
-  /** Premio o reconocimiento: la etiqueta se marca con una estrella. */
-  award?: boolean;
-  description: string;
-  meta: { label: string; value: string }[];
-}
-
-export interface TimelineYear {
-  year: string;
-  entries: TimelineEntry[];
-}
-
-/** Experiencia agrupada por año, para las carpetas de la sección. Sale del CV. */
-export const timeline: TimelineYear[] = [
-  {
-    year: '2023',
-    entries: [
-      {
-        month: '01',
-        monthName: 'Enero',
-        title: 'Técnico de Infraestructura IT & Capacitador',
-        subtitle: 'EPET N.º 7 Vicente A. Salemi',
-        description:
-          'Mantenimiento del hardware y las redes LAN de la institución, y programas de alfabetización digital para docentes y alumnos.',
-        meta: [
-          { label: 'Institución', value: 'EPET N.º 7' },
-          { label: 'Lugar', value: 'Formosa' },
-          { label: 'Período', value: 'Ene — Dic 2023' },
-        ],
-      },
-    ],
-  },
-  {
-    year: '2025',
-    entries: [
-      {
-        month: '11',
-        monthName: 'Noviembre',
-        title: 'Agente de viajes con IA',
-        subtitle: 'Final Proyecto · Politécnico Formosa',
-        tag: 'Full stack',
-        description:
-          'Chatbot conectado a herramientas propias vía MCP para reservar y cambiar vuelos, mover fechas y recomendar destinos según el clima. Me encargué de construir las tools.',
-        meta: [
-          { label: 'Equipo', value: 'Final Proyecto' },
-          { label: 'Rol', value: 'Full stack' },
-          { label: 'Período', value: 'Nov 2025' },
-        ],
-      },
-      {
-        month: '10',
-        monthName: 'Octubre',
-        title: 'Tienda de deportes',
-        subtitle: 'Final Proyecto · Politécnico Formosa',
-        tag: 'Frontend',
-        description:
-          'Sistema de gestión de stock para una tienda de artículos deportivos. Me enfoqué en el frontend.',
-        meta: [
-          { label: 'Equipo', value: 'Final Proyecto' },
-          { label: 'Rol', value: 'Frontend' },
-          { label: 'Período', value: 'Oct — Nov 2025' },
-        ],
-      },
-      {
-        month: '10',
-        monthName: 'Octubre',
-        title: 'Producción Ambiente',
-        subtitle: 'Hackatón de 24 horas · Politécnico Formosa',
-        tag: '2.º puesto',
-        award: true,
-        description:
-          'Gestión para empresas agropecuarias: cultivos, ganado y stock, con un chatbot que consulta la base de insumos y avisa qué está por agotarse, un panel de KPIs y un mapa con la ubicación del ganado. Me enfoqué en el frontend.',
-        meta: [
-          { label: 'Desafío', value: 'Innovación agropecuaria' },
-          { label: 'Resultado', value: 'Segundo puesto' },
-          { label: 'Duración', value: '24 horas' },
-        ],
-      },
-      {
-        month: '09',
-        monthName: 'Septiembre',
-        title: 'Desarrollador de Software',
-        subtitle: 'Instituto Politécnico Formosa · Proyecto Numa',
-        tag: 'IA & Automation',
-        description:
-          'Sistema de tutoría inteligente con IA para enseñar matemáticas: interfaces web y móvil, servicios de backend y flujos de datos automatizados.',
-        meta: [
-          { label: 'Institución', value: 'Politécnico Formosa' },
-          { label: 'Lugar', value: 'Formosa' },
-          { label: 'Período', value: 'Sep — Nov 2025' },
-        ],
-      },
-    ],
-  },
-  {
-    year: '2026',
-    entries: [
-      {
-        month: '07',
-        monthName: 'Julio',
-        title: 'Desarrollador Frontend & Mobile',
-        subtitle: 'Consultoría Gotechy · Proyecto Nórdico',
-        tag: 'Actual',
-        description:
-          'Plataforma corporativa web y móvil para el Ministerio de Economía y Finanzas de Formosa, con componentes compartidos entre ambas plataformas y entregas continuas bajo Scrum.',
-        meta: [
-          { label: 'Empresa', value: 'Gotechy' },
-          { label: 'Modalidad', value: 'Remoto' },
-          { label: 'Período', value: 'Jul 2026 — Hoy' },
-        ],
-      },
-      {
-        month: '05',
-        monthName: 'Mayo',
-        title: 'Desarrollador Frontend Freelance',
-        subtitle: 'Proyectos con clientes reales',
-        tag: 'Freelance',
-        description:
-          'Tres productos entregados y desplegados: un e-commerce en uso diario por el cliente, una webapp gastronómica con comandas en tiempo real y una plataforma educativa que sumó una segunda etapa.',
-        meta: [
-          { label: 'Proyectos', value: 'El Rey del Maní · Don Miguel · Juntos Somos Iglesia' },
-          { label: 'Modalidad', value: 'Remoto' },
-          { label: 'Período', value: 'May — Ago 2026' },
-        ],
-      },
-    ],
-  },
-];
-
-/** Reconocimiento destacado, con bloque propio antes de Experiencia. */
-export const recognition = {
-  title: '2.º puesto',
-  event: 'Hackatón de 24 horas · Politécnico Formosa',
-  project: 'Producción Ambiente',
-  description:
-    'Gestión para empresas agropecuarias: cultivos, ganado y stock, con un chatbot que consulta la base de insumos y avisa qué está por agotarse, un panel de KPIs y un mapa con la ubicación del ganado.',
-  meta: [
-    { label: 'Duración', value: '24 horas' },
-    { label: 'Rol', value: 'Frontend' },
-    { label: 'Fecha', value: 'Oct 2025' },
-  ],
-};
-
-export interface Project {
+export interface WorkEntry {
   id: string;
-  name: string;
+  /** Año de la entrada; ordena la sección y encabeza la tarjeta. */
   year: string;
-  kind: string;
+  period: string;
+  /** Para quién fue: empresa, cliente o institución. */
+  client: string;
+  title: string;
+  /** Mi papel concreto en esa entrada. */
+  role: string;
   description: string;
   stack: string[];
   href?: string;
   hrefLabel?: string;
-  /** Color del proyecto: tiñe su carátula generada y el glow de la fila. */
+  /** Premio o distincion: la tarjeta lo marca con una estrella. */
+  award?: string;
+  /** Símbolo que representa al proyecto, en lugar de una captura. */
+  icon: WorkIcon;
+  /** Color de la entrada: tiñe su ícono y su acento. */
   accent: string;
-  /** Semilla del degradado procedural que reemplaza a la captura. */
-  seed: number;
 }
 
-export const projects: Project[] = [
+/** Los símbolos disponibles; cada uno se dibuja en el componente. */
+export type WorkIcon =
+  | 'gobierno'
+  | 'tienda'
+  | 'gastronomia'
+  | 'educacion'
+  | 'galeria'
+  | 'viaje'
+  | 'deporte'
+  | 'agro'
+  | 'infra';
+
+/**
+ * Experiencia y proyectos en una sola línea de tiempo. Estaban partidos en dos
+ * secciones que contaban lo mismo dos veces: el puesto por un lado y el
+ * producto por el otro. Acá cada entrada dice para quién fue, qué se construyó
+ * y cuál fue mi parte, que es lo que se venía a buscar en las dos.
+ */
+export const work: WorkEntry[] = [
   {
     id: 'nordico',
-    accent: '#3B6DFF',
-    seed: 11,
-    name: 'Nórdico',
+    icon: 'gobierno',
     year: '2026',
-    kind: 'Plataforma corporativa',
+    period: 'Jul 2026 — Hoy',
+    client: 'Consultoría Gotechy',
+    title: 'Nórdico',
+    role: 'Frontend & Mobile',
     description:
-      'Plataforma web y móvil para el Ministerio de Economía y Finanzas de Formosa, junto a Gotechy y DIHM. Frontend en Flutter para iOS y Android y en Jaspr para web, sobre un backend en Java Spring Boot.',
+      'Plataforma corporativa web y móvil para el Ministerio de Economía y Finanzas de Formosa, con componentes compartidos entre ambas plataformas y entregas continuas bajo Scrum.',
     stack: ['Flutter', 'Jaspr', 'Java Spring Boot'],
+    accent: '#3B6DFF',
   },
   {
     id: 'rey-del-mani',
-    accent: '#F5B300',
-    seed: 29,
-    name: 'El Rey del Maní',
+    icon: 'tienda',
     year: '2026',
-    kind: 'E-commerce mayorista',
+    period: 'May — Ago 2026',
+    client: 'Freelance',
+    title: 'El Rey del Maní',
+    role: 'Desarrollo completo',
     description:
-      'Catálogo multirrubro con carrusel de productos, secciones de alimentos e insumos y consulta directa por WhatsApp. Desplegado en producción y en uso por el cliente.',
+      'E-commerce mayorista multirrubro con carrusel de productos, secciones de alimentos e insumos y consulta directa por WhatsApp. Desplegado y en uso diario por el cliente.',
     stack: ['Next.js', 'Tailwind CSS', 'Prisma', 'PostgreSQL'],
     href: 'https://el-rey-del-mani-353e.vercel.app/',
     hrefLabel: 'Ver online',
+    accent: '#F5B300',
   },
   {
     id: 'don-miguel',
-    accent: '#FF6B2C',
-    seed: 47,
-    name: 'Don Miguel',
+    icon: 'gastronomia',
     year: '2026',
-    kind: 'Webapp gastronómica',
+    period: 'May — Ago 2026',
+    client: 'Freelance',
+    title: 'Don Miguel',
+    role: 'Desarrollo completo',
     description:
-      'Menú digital interactivo, agenda de reservas y envío de comandas en tiempo real hacia cocina, ordenando el flujo de pedidos y reduciendo errores de comunicación con el personal.',
+      'Webapp gastronómica con menú digital, agenda de reservas y envío de comandas en tiempo real hacia cocina. Ordenó el flujo de pedidos y redujo los errores de comunicación con el personal.',
     stack: ['Next.js', 'Tailwind CSS', 'Prisma', 'PostgreSQL'],
     href: 'https://github.com/mau-jsx/Don-Miguel-Restaurante',
     hrefLabel: 'Repositorio',
+    accent: '#FF6B2C',
   },
   {
     id: 'juntos-somos-iglesia',
-    accent: '#8B5CF6',
-    seed: 67,
-    name: 'Juntos Somos Iglesia',
+    icon: 'educacion',
     year: '2026',
-    kind: 'Plataforma educativa',
+    period: 'May — Ago 2026',
+    client: 'Freelance',
+    title: 'Juntos Somos Iglesia',
+    role: 'Desarrollo completo',
     description:
-      'Formación y gestión de cursos con carga de contenido audiovisual, colaboradores y profesores por curso, y reproductor integrado para aprender dentro de la plataforma.',
+      'Plataforma educativa con carga de contenido audiovisual, colaboradores y profesores por curso, y reproductor integrado para cursar dentro de la misma plataforma.',
     stack: ['Next.js', 'Prisma', 'PostgreSQL'],
     href: 'https://github.com/rincon-digital/juntos-somos-iglesia',
     hrefLabel: 'Repositorio',
+    accent: '#8B5CF6',
   },
   {
     id: 'galeria-jsi',
-    accent: '#00D26A',
-    seed: 83,
-    name: 'Galería JSI',
+    icon: 'galeria',
     year: '2026',
-    kind: 'Galería comunitaria',
+    period: 'May — Ago 2026',
+    client: 'Freelance',
+    title: 'Galería JSI',
+    role: 'Desarrollo completo',
     description:
-      'Segunda fase del proyecto anterior: carga masiva y distribución de fotografías de eventos, con purga automática a los 30 días para no sobrecargar almacenamiento ni base de datos.',
-    stack: ['Next.js', 'Prisma', 'Cloud Storage'],
+      'Segunda etapa del proyecto anterior: carga masiva y distribución de fotografías de eventos, con purga automática a los 30 días para no sobrecargar el almacenamiento ni la base.',
+    stack: ['Next.js', 'Prisma', 'PostgreSQL', 'Cloud Storage'],
     href: 'https://github.com/rincon-digital/galeria-jsi',
     hrefLabel: 'Repositorio',
+    accent: '#00D26A',
+  },
+  {
+    id: 'agente-viajes',
+    icon: 'viaje',
+    year: '2025',
+    period: 'Nov 2025',
+    client: 'Final Proyecto · Politécnico Formosa',
+    title: 'Agente de viajes con IA',
+    role: 'Full stack · construí las tools',
+    description:
+      'Chatbot conectado a herramientas propias vía MCP para reservar y cambiar vuelos, mover fechas y recomendar destinos según el clima.',
+    stack: ['Next.js', 'Node.js', 'TypeScript', 'MCP'],
+    accent: '#06B6D4',
+  },
+  {
+    id: 'tienda-deportes',
+    icon: 'deporte',
+    year: '2025',
+    period: 'Oct — Nov 2025',
+    client: 'Final Proyecto · Politécnico Formosa',
+    title: 'Tienda de deportes',
+    role: 'Frontend',
+    description:
+      'Sistema de gestión de stock para una tienda de artículos deportivos, con el catálogo y el movimiento de mercadería en una sola vista.',
+    stack: ['React', 'TypeScript', 'Tailwind CSS'],
+    accent: '#22C55E',
+  },
+  {
+    id: 'produccion-ambiente',
+    icon: 'agro',
+    year: '2025',
+    period: 'Oct 2025',
+    client: 'Hackatón de 24 horas · Politécnico Formosa',
+    title: 'Producción Ambiente',
+    role: 'Frontend',
+    award: '2.º puesto',
+    description:
+      'Gestión para empresas agropecuarias: cultivos, ganado y stock, con un chatbot que consulta la base de insumos y avisa qué está por agotarse, un panel de KPIs y un mapa con la ubicación del ganado.',
+    stack: ['React', 'Tailwind CSS', 'Node.js'],
+    accent: '#E0A526',
   },
   {
     id: 'numa',
-    accent: '#EC4899',
-    seed: 101,
-    name: 'Numa',
+    icon: 'educacion',
     year: '2025',
-    kind: 'Tutoría con IA',
+    period: 'Sep — Nov 2025',
+    client: 'Instituto Politécnico Formosa',
+    title: 'Numa',
+    role: 'Desarrollador de software',
     description:
-      'Sistema de aprendizaje de matemáticas que se adapta al nivel del alumno. La docente carga PDFs, la IA los procesa y genera evaluaciones en tiempo real con puntos y ranking.',
+      'Tutoría inteligente para enseñar matemáticas: la docente carga PDFs, la IA los procesa y genera evaluaciones en tiempo real con puntos y ranking, en web y en móvil.',
     stack: ['Next.js', 'React Native', 'Nest.js', 'Prisma'],
     href: 'https://github.com/Final-Proyecto/Piaxion',
     hrefLabel: 'Repositorio',
+    accent: '#EC4899',
+  },
+  {
+    id: 'epet-7',
+    icon: 'infra',
+    year: '2023',
+    period: 'Ene — Dic 2023',
+    client: 'EPET N.º 7 Vicente A. Salemi',
+    title: 'Infraestructura IT y capacitación',
+    role: 'Técnico y capacitador',
+    description:
+      'Mantenimiento del hardware y las redes LAN de la institución, y programas de alfabetización digital para docentes y alumnos.',
+    stack: ['Redes LAN', 'Hardware', 'Capacitación'],
+    accent: '#64748B',
   },
 ];
 
@@ -326,7 +267,6 @@ export interface NavItem {
 export const navItems: NavItem[] = [
   { label: 'Inicio', href: '#inicio' },
   { label: 'Perfil', href: '#perfil' },
-  { label: 'Experiencia', href: '#experiencia' },
-  { label: 'Proyectos', href: '#proyectos' },
+  { label: 'Trabajo', href: '#trabajo' },
   { label: 'Contacto', href: '#contacto' },
 ];

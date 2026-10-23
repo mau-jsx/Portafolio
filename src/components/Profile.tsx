@@ -17,7 +17,7 @@ import springLogo from 'thesvg/spring-boot';
 import postgresLogo from 'thesvg/postgresql';
 import prismaLogo from 'thesvg/prisma';
 import supabaseLogo from 'thesvg/supabase';
-import { profile, links, recognition, getMailto } from '../data/site';
+import { profile, links, getMailto } from '../data/site';
 import { registerGsap, prefersReducedMotion, EASE_OUT, revealTrigger } from '../lib/motion';
 import {
   getVisitorId,
@@ -138,14 +138,6 @@ const InstagramIcon = () => (
   </svg>
 );
 
-const TrophyIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" {...stroke}>
-    <path d="M7 4h10v5a5 5 0 0 1-10 0V4Z" />
-    <path d="M7 5.5H4.5v1A3.5 3.5 0 0 0 7.6 10M17 5.5h2.5v1a3.5 3.5 0 0 1-3.1 3.5" />
-    <path d="M12 14v3.5M8.5 20.5h7M10 20.5c0-1.7.9-3 2-3s2 1.3 2 3" />
-  </svg>
-);
-
 interface Card {
   icon: () => JSX.Element;
   label: string;
@@ -160,12 +152,12 @@ const CARDS: Card[] = [
   { icon: GithubIcon, label: 'GitHub', value: '@mau-jsx', note: 'Todo el código', href: links.github },
   // El correo no lleva valor visible ni href fijo: se arma al hidratar.
   { icon: MailIcon, label: 'Email', value: 'Escribime', note: 'Respondo rápido', mail: true },
-  { icon: InstagramIcon, label: 'Instagram', value: '@mau.jsx', note: 'El detrás', href: links.instagram },
   {
-    icon: TrophyIcon,
-    label: 'Hackatón',
-    value: recognition.title,
-    note: 'Politécnico Formosa · 24 h',
+    icon: InstagramIcon,
+    label: 'Instagram',
+    value: '@mau.jsx',
+    note: 'El detrás',
+    href: links.instagram,
   },
 ];
 
@@ -261,8 +253,8 @@ export default function Profile({ portrait }: ProfileProps) {
   };
 
   return (
-    <section ref={rootRef} id="perfil" aria-label="Perfil" className="shell py-24 sm:py-32">
-      <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-20">
+    <section ref={rootRef} id="perfil" aria-label="Perfil" className="shell flex min-h-[100svh] flex-col justify-center pb-16 pt-28">
+      <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-14">
         <div data-avatar-card="perfil" className="max-w-[44rem]">
           {/* Sin marco ni círculo: el dibujo solo, apoyado sobre el fondo. */}
           <div data-profile-avatar className="flex flex-wrap items-center gap-4">
@@ -273,11 +265,11 @@ export default function Profile({ portrait }: ProfileProps) {
               sizes="6rem"
               alt=""
               decoding="async"
-              className={`h-20 w-20 shrink-0 object-contain transition-opacity duration-300 sm:h-24 sm:w-24 ${
+              className={`h-16 w-16 shrink-0 object-contain transition-opacity duration-300 sm:h-[4.5rem] sm:w-[4.5rem] ${
                 holdsAvatar ? 'opacity-100' : 'opacity-0'
               }`}
             />
-            <p className="text-[clamp(1.75rem,4vw,2.75rem)] font-bold leading-none tracking-[-0.035em] text-[var(--fg)]">
+            <p className="text-[clamp(1.6rem,3.2vw,2.35rem)] font-bold leading-none tracking-[-0.035em] text-[var(--fg)]">
               ¡Hola!
             </p>
 
@@ -321,7 +313,7 @@ export default function Profile({ portrait }: ProfileProps) {
 
           <h2
             data-profile-text
-            className="mt-8 text-[clamp(1.4rem,2.8vw,2.1rem)] font-semibold leading-[1.28] tracking-[-0.03em] text-[var(--fg)]"
+            className="mt-6 text-[clamp(1.25rem,2vw,1.6rem)] font-semibold leading-[1.3] tracking-[-0.03em] text-[var(--fg)]"
           >
             Diseño y construyo experiencias de usuario.{' '}
             <span className="text-[var(--fg-faint)]">
@@ -331,7 +323,7 @@ export default function Profile({ portrait }: ProfileProps) {
 
           <p
             data-profile-text
-            className="mt-6 max-w-[38rem] text-base leading-relaxed text-[var(--fg-muted)] sm:text-lg"
+            className="mt-4 max-w-[38rem] text-[0.975rem] leading-relaxed text-[var(--fg-muted)]"
           >
             {profile.about}
           </p>
@@ -340,7 +332,7 @@ export default function Profile({ portrait }: ProfileProps) {
             data-profile-text
             href={links.cv}
             download
-            className="mt-9 inline-flex items-center gap-2.5 rounded-full bg-[var(--fg)] px-6 py-3.5 text-sm font-semibold text-[var(--bg)] transition-transform duration-300 hover:-translate-y-0.5"
+            className="mt-7 inline-flex items-center gap-2.5 rounded-full bg-[var(--fg)] px-6 py-3 text-sm font-semibold text-[var(--bg)] transition-transform duration-300 hover:-translate-y-0.5"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]" {...stroke}>
               <path d="M12 3.5v11m0 0 4-4m-4 4-4-4" />
@@ -352,7 +344,7 @@ export default function Profile({ portrait }: ProfileProps) {
 
         {/* La columna derecha va a un ancho fijo: los panales y las tarjetas
             comparten borde, así no queda aire suelto entre bloques. */}
-        <div className="flex flex-col gap-12 lg:w-[34rem]">
+        <div className="flex flex-col gap-8 lg:w-[34rem] lg:pt-2">
           <div className="flex flex-wrap gap-x-10 gap-y-9">
           {HIVES.map((hive) => {
             const { cells, width, height } = layout(hive);
@@ -410,7 +402,7 @@ export default function Profile({ portrait }: ProfileProps) {
             puertas de salida y la última es el logro. Mismo alto, para que se
             lean como bloque y no sobre aire en la columna.
           */}
-          <ul className="grid list-none grid-cols-2 gap-4">
+          <ul className="grid list-none grid-cols-3 gap-4">
             {CARDS.map(({ icon: Icon, label, value, note, href, mail }) => {
               const target = mail ? mailto : href;
           const body = (
@@ -430,7 +422,7 @@ export default function Profile({ portrait }: ProfileProps) {
           );
 
           const shell =
-            'group flex h-full min-h-[9.5rem] flex-col rounded-2xl border border-[var(--rule)] bg-[var(--bg-raised)] p-5 transition-all duration-300';
+            'group flex h-full min-h-[8.5rem] flex-col rounded-2xl border border-[var(--rule)] bg-[var(--bg-raised)] p-5 transition-all duration-300';
 
           return (
             <li key={label} data-profile-card>

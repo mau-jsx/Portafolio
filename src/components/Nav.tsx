@@ -12,7 +12,7 @@ import {
   Linkedin01Icon,
   WhatsappIcon,
 } from '@hugeicons/core-free-icons';
-import { Home, User, Work, Folder, Call, ChevronDown, Message } from 'react-iconly';
+import { Home, User, Work, Call, ChevronDown, Message } from 'react-iconly';
 import { navItems, links, getMailto } from '../data/site';
 import { registerGsap, prefersReducedMotion, refreshOnLoad } from '../lib/motion';
 
@@ -23,8 +23,7 @@ const DETACH_AT = 72;
 const SECTION_ICONS: Record<string, typeof Home> = {
   inicio: Home,
   perfil: User,
-  experiencia: Work,
-  proyectos: Folder,
+  trabajo: Work,
   contacto: Call,
 };
 
@@ -67,6 +66,11 @@ export default function Nav({ avatar }: NavProps) {
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const flipState = useRef<Flip.FlipState | null>(null);
+  // El vuelo en curso, para cortarlo si llega otro cambio antes de que termine.
+  const flipTween = useRef<gsap.core.Timeline | null>(null);
+  // El vuelo de vuelta a una tarjeta espera un cuadro; si llega otro cambio
+  // antes, ese vuelo pendiente se cancela en vez de correr con datos viejos.
+  const flipFrame = useRef(0);
 
   /*
    * Arriba y con ancho, la barra completa: pestaña con tu nombre sobre la
@@ -79,8 +83,22 @@ export default function Nav({ avatar }: NavProps) {
   const avatarHolder = cardHolder ?? 'nav';
   const hasAvatar = avatarHolder === 'nav';
 
+  /*
+   * Medidas que Flip escribe en línea mientras anima. Se borran a mano al
+   * terminar y antes de medir: si alguna queda, la barra se queda con el ancho
+   * de la cápsula (pasaba en Firefox, donde los cambios llegan más seguidos).
+   */
+  const clearFlipSizes = () =>
+    gsap.set('[data-flip-id]', { clearProps: 'width,height,transform,top,left,position' });
+
   /* Foto del estado actual justo antes de cambiar de forma, para Flip. */
   const captureFlip = () => {
+    // Si un vuelo sigue en curso se termina de golpe: limpia el ancho y el
+    // alto que escribió. Medir a mitad de camino deja ese tamaño pegado.
+    cancelAnimationFrame(flipFrame.current);
+    flipTween.current?.progress(1).kill();
+    flipTween.current = null;
+    clearFlipSizes();
     flipState.current = Flip.getState('[data-flip-id]');
   };
 
@@ -179,14 +197,16 @@ export default function Nav({ avatar }: NavProps) {
 
     if (!state || prefersReducedMotion()) return;
 
-    const flight = () =>
-      Flip.from(state, {
+    const flight = () => {
+      flipTween.current = Flip.from(state, {
         targets: document.querySelectorAll('[data-flip-id]'),
         duration: 0.6,
         ease: 'expo.out',
         nested: true,
         prune: true,
+        onComplete: clearFlipSizes,
       });
+    };
 
     /*
      * Hacia la barra el destino ya existe. De vuelta a una tarjeta hay que
@@ -194,13 +214,14 @@ export default function Nav({ avatar }: NavProps) {
      * terminó de dibujarse.
      */
     if (hasAvatar) flight();
-    else requestAnimationFrame(flight);
-    gsap.from('[data-nav-content]', {
-      opacity: 0,
-      duration: 0.3,
-      delay: 0.18,
-      ease: 'power1.out',
-    });
+    else flipFrame.current = requestAnimationFrame(flight);
+    // fromTo y no from: si un fundido se corta a la mitad, `from` tomaría
+    // esa opacidad a medias como destino y el contenido quedaría apagado.
+    gsap.fromTo(
+      '[data-nav-content]',
+      { opacity: 0 },
+      { opacity: 1, duration: 0.3, delay: 0.18, ease: 'power1.out', overwrite: true },
+    );
   }, [compact, avatarHolder]);
 
   /* Menú de la cápsula: foco adentro al abrir, Escape y click afuera cierran. */
