@@ -4,10 +4,9 @@ import { Flip } from 'gsap/Flip';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { HugeiconsIcon } from '@hugeicons/react';
 // Iconly para la interfaz. Hugeicons queda sólo para lo que Iconly gratis no
-// trae: logos de marca y el sol/luna del tema.
+// trae: logos de marca y el globo del idioma.
 import {
-  Sun02Icon,
-  MoonIcon,
+  Globe02Icon,
   Github01Icon,
   Linkedin01Icon,
   WhatsappIcon,
@@ -15,6 +14,7 @@ import {
 import { Home, User, Work, Call, ChevronDown, Message } from 'react-iconly';
 import { navItems, links, getMailto } from '../data/site';
 import { registerGsap, prefersReducedMotion, refreshOnLoad } from '../lib/motion';
+import { useLang, setLang, t } from '../lib/i18n';
 
 /** Umbral de despegue: lo que hay que bajar para que la barra se compacte. */
 const DETACH_AT = 72;
@@ -25,6 +25,14 @@ const SECTION_ICONS: Record<string, typeof Home> = {
   perfil: User,
   trabajo: Work,
   contacto: Call,
+};
+
+/** Nombre de cada sección en inglés; el español sale de `navItems`. */
+const LABELS_EN: Record<string, string> = {
+  inicio: 'Home',
+  perfil: 'Profile',
+  trabajo: 'Work',
+  contacto: 'Contact',
 };
 
 /** Redes al pie del menú de la cápsula. */
@@ -42,7 +50,9 @@ interface NavProps {
 }
 
 export default function Nav({ avatar }: NavProps) {
-  const [isDark, setIsDark] = useState(true);
+  const lang = useLang();
+  const labelOf = (item: (typeof navItems)[number]) =>
+    lang === 'en' ? LABELS_EN[item.href.slice(1)] : item.label;
   // Vacío en el HTML servido; se llena recién al hidratar, en el navegador.
   const [mailto, setMailto] = useState('');
 
@@ -51,14 +61,6 @@ export default function Nav({ avatar }: NavProps) {
   const [detached, setDetached] = useState(false);
   const [isWide, setIsWide] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
-  /*
-   * El retrato lo muestra la tarjeta que esté a la vista — la del hero o la de
-   * Perfil — y la barra se lo queda cuando no hay ninguna. Mirar las tarjetas
-   * y no las secciones es lo que hace que el imán agarre en el momento justo:
-   * una sección es alta y entra en pantalla mucho antes que su tarjeta.
-   */
-  const [cardHolder, setCardHolder] = useState<string | null>('hero');
-  const visibleCards = useRef(new Set<string>());
   const [panelAnimates, setPanelAnimates] = useState(false);
   const [active, setActive] = useState('inicio');
 
@@ -79,9 +81,12 @@ export default function Nav({ avatar }: NavProps) {
    */
   const compact = detached || !isWide;
 
-  /* Quién muestra el retrato en cada tramo del scroll. */
-  const avatarHolder = cardHolder ?? 'nav';
-  const hasAvatar = avatarHolder === 'nav';
+  /*
+   * La cápsula lleva su propio retrato, siempre. Antes uno solo viajaba entre
+   * el hero, la barra y Perfil, y en cada pase desaparecía de un lado antes
+   * de aparecer en el otro.
+   */
+  const hasAvatar = true;
 
   /*
    * Medidas que Flip escribe en línea mientras anima. Se borran a mano al
@@ -101,10 +106,6 @@ export default function Nav({ avatar }: NavProps) {
     clearFlipSizes();
     flipState.current = Flip.getState('[data-flip-id]');
   };
-
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
-  }, []);
 
   /* Ancho disponible: debajo de md la barra completa no entra. */
   useEffect(() => {
@@ -131,30 +132,6 @@ export default function Nav({ avatar }: NavProps) {
           captureFlip();
           setDetached(self.isActive);
         },
-      });
-
-      /*
-       * Imán del retrato: cada tarjeta lo reclama mientras se la ve, y lo
-       * suelta cuando se va por arriba, detrás de la barra.
-       */
-      document.querySelectorAll<HTMLElement>('[data-avatar-card]').forEach((card) => {
-        const key = card.dataset.avatarCard ?? '';
-        visibleCards.current.delete(key);
-
-        ScrollTrigger.create({
-          trigger: card,
-          start: 'top bottom-=24',
-          end: 'bottom 116px',
-          invalidateOnRefresh: true,
-          onToggle: (self) => {
-            captureFlip();
-            if (self.isActive) visibleCards.current.add(key);
-            else visibleCards.current.delete(key);
-
-            const cards = visibleCards.current;
-            setCardHolder(cards.has('hero') ? 'hero' : cards.has('perfil') ? 'perfil' : null);
-          },
-        });
       });
 
       navItems.forEach(({ href }) => {
@@ -190,11 +167,6 @@ export default function Nav({ avatar }: NavProps) {
     // hasta que se toque la cápsula, o nace animando de visible a oculto.
     setPanelAnimates(false);
 
-    // El hero muestra el retrato mientras la barra no se lo lleve.
-    window.dispatchEvent(
-      new CustomEvent('portfolio:nav-avatar', { detail: { holder: avatarHolder } }),
-    );
-
     if (!state || prefersReducedMotion()) return;
 
     const flight = () => {
@@ -208,13 +180,7 @@ export default function Nav({ avatar }: NavProps) {
       });
     };
 
-    /*
-     * Hacia la barra el destino ya existe. De vuelta a una tarjeta hay que
-     * esperar un cuadro: el destino vive en otra isla de React y todavía no
-     * terminó de dibujarse.
-     */
-    if (hasAvatar) flight();
-    else flipFrame.current = requestAnimationFrame(flight);
+    flight();
     // fromTo y no from: si un fundido se corta a la mitad, `from` tomaría
     // esa opacidad a medias como destino y el contenido quedaría apagado.
     gsap.fromTo(
@@ -222,7 +188,7 @@ export default function Nav({ avatar }: NavProps) {
       { opacity: 0 },
       { opacity: 1, duration: 0.3, delay: 0.18, ease: 'power1.out', overwrite: true },
     );
-  }, [compact, avatarHolder]);
+  }, [compact]);
 
   /* Menú de la cápsula: foco adentro al abrir, Escape y click afuera cierran. */
   useEffect(() => {
@@ -247,47 +213,11 @@ export default function Nav({ avatar }: NavProps) {
     };
   }, [menuOpen]);
 
-  const applyTheme = (next: boolean) => {
-    document.documentElement.classList.toggle('dark', next);
-    document.documentElement.style.colorScheme = next ? 'dark' : 'light';
-    localStorage.setItem('theme', next ? 'dark' : 'light');
-    setIsDark(next);
-  };
-
-  const toggleTheme = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const next = !isDark;
-    const startViewTransition = (
-      document as Document & { startViewTransition?: (cb: () => void) => { ready: Promise<void> } }
-    ).startViewTransition;
-
-    if (!startViewTransition || prefersReducedMotion()) {
-      applyTheme(next);
-      return;
-    }
-
-    // El tema se abre desde el botón: el origen del cambio queda a la vista.
-    const { left, top, width, height } = event.currentTarget.getBoundingClientRect();
-    const x = left + width / 2;
-    const y = top + height / 2;
-    const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-
-    startViewTransition.call(document, () => applyTheme(next)).ready.then(() => {
-      document.documentElement.animate(
-        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-        {
-          duration: 640,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          pseudoElement: '::view-transition-new(root)',
-        },
-      );
-    });
-  };
-
   const activeItem = navItems.find((item) => item.href.slice(1) === active) ?? navItems[0];
   const ActiveIcon = SECTION_ICONS[activeItem.href.slice(1)];
 
   const iconButton =
-    'grid h-9 w-9 shrink-0 place-items-center rounded-full text-[var(--fg-muted)] transition-colors duration-200 hover:bg-[color-mix(in_srgb,var(--accent)_24%,transparent)] hover:text-[var(--fg)]';
+    'grid h-11 w-11 shrink-0 place-items-center rounded-full text-[var(--fg-muted)] transition-colors duration-200 hover:bg-[color-mix(in_srgb,var(--accent)_24%,transparent)] hover:text-[var(--fg)]';
 
   /* Enlace de sección: el activo lleva píldora verde y el icono en su disco. */
   const sectionLink = (item: (typeof navItems)[number], stacked = false) => {
@@ -301,35 +231,37 @@ export default function Nav({ avatar }: NavProps) {
         href={item.href}
         onClick={() => setMenuOpen(false)}
         aria-current={isActive ? 'true' : undefined}
-        className={`flex items-center gap-2 rounded-full pr-3.5 text-sm font-medium transition-all duration-300 ${
-          stacked ? 'min-h-11 w-full' : 'min-h-9'
+        className={`flex min-h-11 items-center gap-2.5 rounded-full pr-4 text-[0.95rem] font-medium transition-all duration-300 ${
+          stacked ? 'w-full' : ''
         } ${
           isActive
             ? 'bg-[color-mix(in_srgb,var(--accent)_52%,transparent)] pl-1.5 text-[var(--fg)]'
-            : 'pl-3 text-[var(--fg-muted)] hover:bg-[color-mix(in_srgb,var(--accent)_24%,transparent)] hover:text-[var(--fg)]'
+            : 'pl-3.5 text-[var(--fg-muted)] hover:bg-[color-mix(in_srgb,var(--accent)_24%,transparent)] hover:text-[var(--fg)]'
         }`}
       >
         <span
           aria-hidden="true"
           className={`grid shrink-0 place-items-center rounded-full transition-all duration-300 ${
-            isActive ? 'h-7 w-7 bg-[var(--fg)] text-[var(--bg)]' : 'h-5 w-5 text-current'
+            isActive ? 'h-8 w-8 bg-[var(--fg)] text-[var(--bg)]' : 'h-6 w-6 text-current'
           }`}
         >
-          <Icon set="light" primaryColor="currentColor" size={isActive ? 15 : 17} />
+          <Icon set="light" primaryColor="currentColor" size={isActive ? 17 : 19} />
         </span>
-        {item.label}
+        {labelOf(item)}
       </a>
     );
   };
 
-  const themeButton = (
+  /* Idioma: globo con el código del idioma actual; un toque cambia al otro. */
+  const langButton = (
     <button
       type="button"
-      onClick={toggleTheme}
-      aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-      className={iconButton}
+      onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
+      aria-label={t(lang, 'Cambiar idioma a inglés', 'Switch language to Spanish')}
+      className="flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-[var(--fg-muted)] transition-colors duration-200 hover:bg-[color-mix(in_srgb,var(--accent)_24%,transparent)] hover:text-[var(--fg)]"
     >
-      <HugeiconsIcon icon={isDark ? Sun02Icon : MoonIcon} size={16} strokeWidth={1.7} />
+      <HugeiconsIcon icon={Globe02Icon} size={18} strokeWidth={1.7} />
+      <span className="tnum">{lang === 'en' ? 'EN' : 'ES'}</span>
     </button>
   );
 
@@ -356,8 +288,8 @@ export default function Nav({ avatar }: NavProps) {
               }}
               aria-expanded={menuOpen}
               aria-controls="nav-panel"
-              className={`flex min-h-11 items-center gap-2.5 py-1 pr-3.5 ${
-                hasAvatar ? 'pl-1' : 'pl-3.5'
+              className={`flex min-h-12 items-center gap-3 py-1 pr-4 ${
+                hasAvatar ? 'pl-1' : 'pl-4'
               }`}
             >
               {hasAvatar && (
@@ -365,28 +297,30 @@ export default function Nav({ avatar }: NavProps) {
                   data-flip-id="nav-avatar"
                   src={avatar}
                   alt=""
-                  width={36}
-                  height={36}
-                  className="h-9 w-9 shrink-0 rounded-full bg-[var(--bg)] object-cover"
+                  width={44}
+                  height={44}
+                  className="h-11 w-11 shrink-0 rounded-full bg-[var(--bg)] object-cover"
                 />
               )}
               <span
                 data-nav-content
-                className="flex items-center gap-2 text-sm font-medium text-[var(--fg)]"
+                className="flex items-center gap-2 text-[0.95rem] font-medium text-[var(--fg)]"
               >
-                <ActiveIcon set="light" primaryColor="currentColor" size={17} />
-                {activeItem.label}
+                <ActiveIcon set="light" primaryColor="currentColor" size={19} />
+                {labelOf(activeItem)}
                 <span
                   aria-hidden="true"
                   className={`grid text-[var(--fg-muted)] transition-transform duration-300 ${
                     menuOpen ? 'rotate-180' : ''
                   }`}
                 >
-                  <ChevronDown set="light" primaryColor="currentColor" size={16} />
+                  <ChevronDown set="light" primaryColor="currentColor" size={18} />
                 </span>
               </span>
               <span className="sr-only">
-                {menuOpen ? 'Cerrar menú' : 'Abrir menú de secciones'}
+                {menuOpen
+                  ? t(lang, 'Cerrar menú', 'Close menu')
+                  : t(lang, 'Abrir menú de secciones', 'Open sections menu')}
               </span>
             </button>
           </div>
@@ -399,7 +333,7 @@ export default function Nav({ avatar }: NavProps) {
               panelAnimates ? 'transition-[opacity,translate] duration-200 ease-out' : ''
             } ${menuOpen ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'}`}
           >
-            <nav aria-label="Secciones" className="flex flex-col gap-0.5">
+            <nav aria-label={t(lang, 'Secciones', 'Sections')} className="flex flex-col gap-0.5">
               {navItems.map((item) => sectionLink(item, true))}
             </nav>
             <div className="mt-2 flex items-center justify-between border-t border-[var(--rule)] px-1 pt-2">
@@ -419,7 +353,7 @@ export default function Nav({ avatar }: NavProps) {
                 ))}
               </ul>
               <span aria-hidden="true" className="h-5 w-px bg-[var(--rule)]" />
-              {themeButton}
+              {langButton}
             </div>
           </div>
         </div>
@@ -428,17 +362,17 @@ export default function Nav({ avatar }: NavProps) {
         <div className="pointer-events-auto mx-auto mt-5 flex w-fit max-w-[94vw] flex-col items-center">
           <div
             data-flip-id="nav-surface"
-            className="nav-surface flex items-center gap-1 rounded-full p-1"
+            className="nav-surface flex items-center gap-1 rounded-full p-1.5 shadow-[0_10px_32px_-20px_rgb(0_0_0/0.4)]"
           >
             <nav
               data-nav-content
-              aria-label="Secciones"
+              aria-label={t(lang, 'Secciones', 'Sections')}
               className="flex items-center gap-0.5"
             >
               {navItems.map((item) => sectionLink(item))}
             </nav>
-            <span aria-hidden="true" className="mx-0.5 h-5 w-px bg-[var(--rule)]" />
-            <div data-nav-content>{themeButton}</div>
+            <span aria-hidden="true" className="mx-1 h-6 w-px bg-[var(--rule)]" />
+            <div data-nav-content>{langButton}</div>
           </div>
         </div>
       )}

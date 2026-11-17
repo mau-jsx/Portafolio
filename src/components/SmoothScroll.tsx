@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { registerGsap, prefersReducedMotion, refreshOnLoad } from '../lib/motion';
+import { registerGsap, refreshOnLoad } from '../lib/motion';
 
 /**
  * Scroll suave global. No renderiza nada: sólo conecta Lenis con el ticker de
@@ -19,7 +19,8 @@ export default function SmoothScroll() {
     registerGsap();
     refreshOnLoad();
 
-    if (prefersReducedMotion()) return;
+    // Decisión del dueño del sitio: el scroll suave va siempre, aunque el
+    // sistema pida reducir movimiento. Las animaciones de entrada sí lo respetan.
 
     /*
      * Scroll cinematográfico: la rueda no mueve la página, la empuja. Con lerp

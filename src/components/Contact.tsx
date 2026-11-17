@@ -3,7 +3,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowUpRight, Check, Copy, Mail, MessageCircle, Link2 } from 'lucide-react';
 import { profile, links, getEmail, getMailto } from '../data/site';
-import { registerGsap, prefersReducedMotion, EASE_OUT, revealTrigger } from '../lib/motion';
+import { registerGsap, EASE_OUT, revealTrigger } from '../lib/motion';
+import { useLang, t } from '../lib/i18n';
 
 interface ContactProps {
   /** El paisaje con el que cierra el sitio: se parte en los tres paneles. */
@@ -34,6 +35,7 @@ const secondary =
 export default function Contact({ closing }: ContactProps) {
   const rootRef = useRef<HTMLElement>(null);
   const [copied, setCopied] = useState(false);
+  const lang = useLang();
   // Vacío en el HTML servido; se llena recién al hidratar, en el navegador.
   const [mailto, setMailto] = useState('');
 
@@ -48,12 +50,7 @@ export default function Contact({ closing }: ContactProps) {
       const panels = gsap.utils.toArray<HTMLElement>('[data-split-panel]');
       const fronts = gsap.utils.toArray<HTMLElement>('[data-split-front]');
 
-      // Sin animación: los paneles ya dados vuelta, con el canal a la vista.
-      if (prefersReducedMotion()) {
-        gsap.set(panels, { rotateY: 180 });
-        return;
-      }
-
+      // El giro va siempre, como el scroll suave: es parte de cómo se cuenta la sección.
       gsap
         .timeline({ scrollTrigger: revealTrigger(root, 'top 75%'), defaults: { ease: EASE_OUT } })
         .from('[data-contact-head]', { opacity: 0, y: 20, duration: 0.8, stagger: 0.08 });
@@ -122,17 +119,17 @@ export default function Contact({ closing }: ContactProps) {
     {
       key: 'correo',
       icon: Mail,
-      title: 'Correo',
-      text: 'Para proyectos y propuestas. Respondo el mismo día.',
+      title: t(lang, 'Correo', 'Email'),
+      text: t(lang, 'Para proyectos y propuestas. Respondo el mismo día.', 'For projects and proposals. I reply the same day.'),
       actions: (
         <>
           <a href={mailto} className={primary}>
-            Escribime
+            {t(lang, 'Escribime', 'Write me')}
             <ArrowUpRight size={15} strokeWidth={2.2} />
           </a>
           <button type="button" onClick={copyEmail} className={secondary}>
             {copied ? <Check size={14} strokeWidth={2.5} /> : <Copy size={14} strokeWidth={2} />}
-            {copied ? 'Copiado' : 'Copiar'}
+            {copied ? t(lang, 'Copiado', 'Copied') : t(lang, 'Copiar', 'Copy')}
           </button>
         </>
       ),
@@ -141,10 +138,10 @@ export default function Contact({ closing }: ContactProps) {
       key: 'whatsapp',
       icon: MessageCircle,
       title: 'WhatsApp',
-      text: 'Para algo rápido: un mensaje directo y lo vemos.',
+      text: t(lang, 'Para algo rápido: un mensaje directo y lo vemos.', 'For something quick: send a message and we’ll talk.'),
       actions: (
         <a href={links.whatsapp} target="_blank" rel="noreferrer" className={primary}>
-          Abrir chat
+          {t(lang, 'Abrir chat', 'Open chat')}
           <ArrowUpRight size={15} strokeWidth={2.2} />
         </a>
       ),
@@ -152,8 +149,8 @@ export default function Contact({ closing }: ContactProps) {
     {
       key: 'redes',
       icon: Link2,
-      title: 'Redes',
-      text: 'Mi recorrido en LinkedIn y todo el código en GitHub.',
+      title: t(lang, 'Redes', 'Socials'),
+      text: t(lang, 'Mi recorrido en LinkedIn y todo el código en GitHub.', 'My background on LinkedIn and all my code on GitHub.'),
       actions: (
         <>
           <a href={links.linkedin} target="_blank" rel="noreferrer" className={primary}>
@@ -173,21 +170,25 @@ export default function Contact({ closing }: ContactProps) {
     <section
       ref={rootRef}
       id="contacto"
-      aria-label="Contacto"
+      aria-label={t(lang, 'Contacto', 'Contact')}
       className="shell flex flex-col pb-16 pt-24 md:h-[100svh] md:pb-10"
     >
       <header className="max-w-[40rem]">
         <p data-contact-head className="type-label text-[var(--fg-faint)]">
-          Contacto
+          {t(lang, 'Contacto', 'Contact')}
         </p>
         <h2
           data-contact-head
           className="mt-2 text-[clamp(2rem,5vw,3.6rem)] font-bold leading-none tracking-[-0.04em] text-[var(--fg)]"
         >
-          Trabajemos juntos
+          {t(lang, 'Trabajemos juntos', 'Let’s work together')}
         </h2>
         <p data-contact-head className="mt-4 text-base leading-relaxed text-[var(--fg-muted)]">
-          ¿Tenés un proyecto en mente? Elegí por dónde y lo charlamos.
+          {t(
+            lang,
+            '¿Tenés un proyecto en mente? Elegí por dónde y lo charlamos.',
+            'Got a project in mind? Pick a channel and let’s talk.',
+          )}
         </p>
       </header>
 
@@ -220,6 +221,9 @@ export default function Contact({ closing }: ContactProps) {
                   backgroundImage: `url(${closing.src})`,
                   backgroundSize: '300% 100%',
                   backgroundPosition: `${i * 50}% 50%`,
+                  // Un pelo delante del dorso: si no, el borde claro de atrás
+                  // asoma por el suavizado del 3D como una línea blanca.
+                  transform: 'translateZ(1px)',
                 }}
               />
 

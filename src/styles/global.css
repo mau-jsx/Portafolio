@@ -61,15 +61,17 @@
   }
 
   /*
-   * Las secciones sobre la escena WebGL necesitan su propio fondo para que el
-   * texto no compita con el shader. El hero es la excepción: ahí la escena
-   * tiene que verse entera.
+   * Las secciones tapan la escena WebGL con el papel liso, sin transparencia
+   * ni desenfoque: con un 92% el tono de cada sección quedaba apenas distinto
+   * del pie del hero y se veía la línea de corte entre una y otra.
    */
   main > astro-island > section:not(#inicio),
+  /* Trabajo se pinnea: GSAP lo envuelve en un .pin-spacer y la regla de
+     arriba ya no lo alcanza. */
+  main > astro-island > .pin-spacer > section,
   footer {
     position: relative;
-    background-color: color-mix(in srgb, var(--bg) 92%, transparent);
-    backdrop-filter: blur(14px);
+    background-color: var(--bg);
   }
 
   /* Superficies del navegador: también son parte del diseño. */
@@ -243,6 +245,21 @@
     }
     to {
       transform: translateY(-9px);
+    }
+  }
+
+  /* Nubes de Perfil: van y vienen de costado, muy lento. */
+  .cloud-drift {
+    animation: cloud-drift 80s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  @keyframes cloud-drift {
+    from {
+      transform: translateX(-6%);
+    }
+    to {
+      transform: translateX(6%);
     }
   }
 

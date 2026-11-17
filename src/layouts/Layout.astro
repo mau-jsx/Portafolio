@@ -65,12 +65,21 @@ const ogImage = new URL('/og.jpg', canonical);
     />
 
     <script is:inline>
-      // Antes de pintar: evita el flash de tema equivocado.
+      // Antes de pintar: el sitio va siempre en claro y en el idioma guardado.
+      // Los textos fijos (con data-es / data-en) se cambian apenas existen.
       (function () {
-        var saved = localStorage.getItem('theme');
-        var dark = saved ? saved === 'dark' : !window.matchMedia('(prefers-color-scheme: light)').matches;
-        document.documentElement.classList.toggle('dark', dark);
-        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        var root = document.documentElement;
+        root.classList.remove('dark');
+        root.style.colorScheme = 'light';
+        var lang = null;
+        try { lang = localStorage.getItem('lang'); } catch (e) {}
+        if (lang !== 'en') return;
+        root.lang = 'en';
+        document.addEventListener('DOMContentLoaded', function () {
+          document.querySelectorAll('[data-en]').forEach(function (el) {
+            el.textContent = el.getAttribute('data-en');
+          });
+        });
       })();
     </script>
   </head>
@@ -78,6 +87,8 @@ const ogImage = new URL('/og.jpg', canonical);
   <body>
     <a
       href="#contenido"
+      data-es="Saltar al contenido"
+      data-en="Skip to content"
       class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-[var(--fg)] focus:px-5 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-[var(--bg)]"
     >
       Saltar al contenido

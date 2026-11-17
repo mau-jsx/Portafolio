@@ -75,8 +75,13 @@ export const stack: StackGroup[] = [
   },
 ];
 
+/** Pestañas de la sección Trabajo. */
+export type WorkCategory = 'freelance' | 'personal' | 'logro';
+
 export interface WorkEntry {
   id: string;
+  /** En qué pestaña aparece: clientes, proyectos propios o premios. */
+  category: WorkCategory;
   /** Año de la entrada; ordena la sección y encabeza la tarjeta. */
   year: string;
   period: string;
@@ -95,6 +100,16 @@ export interface WorkEntry {
   icon: WorkIcon;
   /** Color de la entrada: tiñe su ícono y su acento. */
   accent: string;
+  /** Los mismos textos en inglés; lo que falta se muestra igual que en español. */
+  en: {
+    period: string;
+    client?: string;
+    role: string;
+    description: string;
+    hrefLabel?: string;
+    award?: string;
+    title?: string;
+  };
 }
 
 /** Los símbolos disponibles; cada uno se dibuja en el componente. */
@@ -117,20 +132,40 @@ export type WorkIcon =
  */
 export const work: WorkEntry[] = [
   {
+    id: 'todo-por-mayor',
+    category: 'freelance',
+    icon: 'tienda',
+    year: '2026',
+    period: 'Nov 2026',
+    client: 'Freelance',
+    title: 'Todo por Mayor',
+    role: 'Desarrollo completo',
+    description:
+      'Catálogo de indumentaria por mayor con panel para crear, editar y eliminar productos, selección de talle y color, y pedidos armados que se envían directo por WhatsApp. Publicado y en uso por la dueña.',
+    stack: ['Next.js', 'Tailwind CSS', 'Supabase'],
+    href: 'https://todopormayor.com.ar/',
+    hrefLabel: 'Ver online',
+    accent: '#E8508B',
+    en: { period: 'Nov 2026', role: 'Full development', description: 'Wholesale clothing catalog with an admin panel to create, edit and delete products, size and color selection, and orders sent straight to WhatsApp. Live and used daily by the owner.', hrefLabel: 'View live' },
+  },
+  {
     id: 'nordico',
+    category: 'freelance',
     icon: 'gobierno',
     year: '2026',
     period: 'Jul 2026 — Hoy',
-    client: 'Consultoría Gotechy',
+    client: 'Freelance',
     title: 'Nórdico',
     role: 'Frontend & Mobile',
     description:
       'Plataforma corporativa web y móvil para el Ministerio de Economía y Finanzas de Formosa, con componentes compartidos entre ambas plataformas y entregas continuas bajo Scrum.',
     stack: ['Flutter', 'Jaspr', 'Java Spring Boot'],
     accent: '#3B6DFF',
+    en: { period: 'Jul 2026 — Present', role: 'Frontend & Mobile', description: 'Corporate web and mobile platform for the Ministry of Economy and Finance of Formosa, with components shared across both platforms and continuous delivery under Scrum.' },
   },
   {
     id: 'rey-del-mani',
+    category: 'freelance',
     icon: 'tienda',
     year: '2026',
     period: 'May — Ago 2026',
@@ -143,9 +178,11 @@ export const work: WorkEntry[] = [
     href: 'https://el-rey-del-mani-353e.vercel.app/',
     hrefLabel: 'Ver online',
     accent: '#F5B300',
+    en: { period: 'May — Aug 2026', role: 'Full development', description: 'Multi-category wholesale e-commerce with a product carousel, food and supplies sections, and direct inquiries via WhatsApp. Deployed and used daily by the client.', hrefLabel: 'View live' },
   },
   {
     id: 'don-miguel',
+    category: 'freelance',
     icon: 'gastronomia',
     year: '2026',
     period: 'May — Ago 2026',
@@ -158,9 +195,11 @@ export const work: WorkEntry[] = [
     href: 'https://github.com/mau-jsx/Don-Miguel-Restaurante',
     hrefLabel: 'Repositorio',
     accent: '#FF6B2C',
+    en: { period: 'May — Aug 2026', role: 'Full development', description: 'Restaurant web app with a digital menu, table bookings and real-time order tickets sent to the kitchen. It streamlined the order flow and cut communication errors with the staff.', hrefLabel: 'Repository' },
   },
   {
     id: 'juntos-somos-iglesia',
+    category: 'freelance',
     icon: 'educacion',
     year: '2026',
     period: 'May — Ago 2026',
@@ -173,9 +212,11 @@ export const work: WorkEntry[] = [
     href: 'https://github.com/rincon-digital/juntos-somos-iglesia',
     hrefLabel: 'Repositorio',
     accent: '#8B5CF6',
+    en: { period: 'May — Aug 2026', role: 'Full development', description: 'Learning platform with video content uploads, collaborators and teachers per course, and a built-in player to take the classes without leaving the platform.', hrefLabel: 'Repository' },
   },
   {
     id: 'galeria-jsi',
+    category: 'freelance',
     icon: 'galeria',
     year: '2026',
     period: 'May — Ago 2026',
@@ -188,9 +229,11 @@ export const work: WorkEntry[] = [
     href: 'https://github.com/rincon-digital/galeria-jsi',
     hrefLabel: 'Repositorio',
     accent: '#00D26A',
+    en: { period: 'May — Aug 2026', role: 'Full development', description: 'Second stage of the previous project: bulk upload and sharing of event photos, with automatic cleanup after 30 days so storage and the database never fill up.', hrefLabel: 'Repository' },
   },
   {
     id: 'agente-viajes',
+    category: 'personal',
     icon: 'viaje',
     year: '2025',
     period: 'Nov 2025',
@@ -201,9 +244,11 @@ export const work: WorkEntry[] = [
       'Chatbot conectado a herramientas propias vía MCP para reservar y cambiar vuelos, mover fechas y recomendar destinos según el clima.',
     stack: ['Next.js', 'Node.js', 'TypeScript', 'MCP'],
     accent: '#06B6D4',
+    en: { period: 'Nov 2025', client: 'Final Project · Politécnico Formosa', role: 'Full stack · built the tools', description: 'Chatbot connected to custom tools via MCP to book and change flights, move dates and suggest destinations based on the weather.', title: 'AI travel agent' },
   },
   {
     id: 'tienda-deportes',
+    category: 'personal',
     icon: 'deporte',
     year: '2025',
     period: 'Oct — Nov 2025',
@@ -214,9 +259,11 @@ export const work: WorkEntry[] = [
       'Sistema de gestión de stock para una tienda de artículos deportivos, con el catálogo y el movimiento de mercadería en una sola vista.',
     stack: ['React', 'TypeScript', 'Tailwind CSS'],
     accent: '#22C55E',
+    en: { period: 'Oct — Nov 2025', client: 'Final Project · Politécnico Formosa', role: 'Frontend', description: 'Stock management system for a sporting goods store, with the catalog and inventory movements in a single view.', title: 'Sports store' },
   },
   {
     id: 'produccion-ambiente',
+    category: 'logro',
     icon: 'agro',
     year: '2025',
     period: 'Oct 2025',
@@ -228,9 +275,11 @@ export const work: WorkEntry[] = [
       'Gestión para empresas agropecuarias: cultivos, ganado y stock, con un chatbot que consulta la base de insumos y avisa qué está por agotarse, un panel de KPIs y un mapa con la ubicación del ganado.',
     stack: ['React', 'Tailwind CSS', 'Node.js'],
     accent: '#E0A526',
+    en: { period: 'Oct 2025', client: '24-hour Hackathon · Politécnico Formosa', role: 'Frontend', award: '2nd place', description: 'Management for agricultural businesses: crops, livestock and stock, with a chatbot that checks the supplies database and warns what is running low, a KPI dashboard and a map with the livestock location.' },
   },
   {
     id: 'numa',
+    category: 'personal',
     icon: 'educacion',
     year: '2025',
     period: 'Sep — Nov 2025',
@@ -243,19 +292,7 @@ export const work: WorkEntry[] = [
     href: 'https://github.com/Final-Proyecto/Piaxion',
     hrefLabel: 'Repositorio',
     accent: '#EC4899',
-  },
-  {
-    id: 'epet-7',
-    icon: 'infra',
-    year: '2023',
-    period: 'Ene — Dic 2023',
-    client: 'EPET N.º 7 Vicente A. Salemi',
-    title: 'Infraestructura IT y capacitación',
-    role: 'Técnico y capacitador',
-    description:
-      'Mantenimiento del hardware y las redes LAN de la institución, y programas de alfabetización digital para docentes y alumnos.',
-    stack: ['Redes LAN', 'Hardware', 'Capacitación'],
-    accent: '#64748B',
+    en: { period: 'Sep — Nov 2025', role: 'Software developer', description: 'Smart tutoring to teach math: the teacher uploads PDFs, AI processes them and builds real-time quizzes with points and a leaderboard, on web and mobile.' },
   },
 ];
 

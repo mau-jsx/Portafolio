@@ -1,24 +1,32 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { Heart } from 'react-iconly';
+import { HugeiconsIcon } from '@hugeicons/react';
+import {
+  Github01Icon,
+  Linkedin01Icon,
+  InstagramIcon,
+  WhatsappIcon,
+  Mail01Icon,
+} from '@hugeicons/core-free-icons';
 import reactLogo from 'thesvg/react';
-import nextLogo from 'thesvg/nextjs';
 import angularLogo from 'thesvg/angular';
 import astroLogo from 'thesvg/astro';
-import typescriptLogo from 'thesvg/typescript';
-import tailwindLogo from 'thesvg/tailwindcss';
-import gsapLogo from 'thesvg/gsap';
-import flutterLogo from 'thesvg/flutter';
-import reactNativeLogo from 'thesvg/reactnative';
 import nodeLogo from 'thesvg/nodejs';
-import nestLogo from 'thesvg/nestjs';
 import javaLogo from 'thesvg/java';
-import springLogo from 'thesvg/spring-boot';
-import postgresLogo from 'thesvg/postgresql';
-import prismaLogo from 'thesvg/prisma';
-import supabaseLogo from 'thesvg/supabase';
-import { profile, links, getMailto } from '../data/site';
+import nextLogo from 'thesvg/nextjs';
+import nestLogo from 'thesvg/nestjs';
+import pythonLogo from 'thesvg/python';
+import flaskLogo from 'thesvg/flask';
+import fastapiLogo from 'thesvg/fastapi';
+import n8nLogo from 'thesvg/n8n';
+import pytorchLogo from 'thesvg/pytorch';
+import langchainLogo from 'thesvg/langchain';
+import tensorflowLogo from 'thesvg/tensorflow';
+import kerasLogo from 'thesvg/keras';
+import { links, getMailto } from '../data/site';
 import { registerGsap, prefersReducedMotion, EASE_OUT, revealTrigger } from '../lib/motion';
+import { useLang, t } from '../lib/i18n';
 import {
   getVisitorId,
   getProfileStats,
@@ -28,7 +36,7 @@ import {
 } from '../lib/supabase';
 
 interface ProfileProps {
-  /** Retrato; el mismo que viaja entre el hero y la barra. */
+  /** Retrato de la presentación. */
   portrait: { src: string; srcSet?: string };
 }
 
@@ -39,65 +47,34 @@ interface Logo {
   variants?: Record<string, string>;
 }
 
-/* El paquete trae el prólogo XML: dentro del HTML sobra. */
-const clean = (markup: string) => markup.replace(/<\?xml[^>]*\?>/, '').trim();
+/*
+ * El paquete trae el prólogo XML, que dentro del HTML sobra, y ids genéricos
+ * («a», «b», «c»). Con varios logos en la misma página esos ids chocan y un
+ * logo termina usando el degradado o la máscara de otro: Angular quedaba
+ * invisible. Cada id se prefija con el slug del logo.
+ */
+const clean = (markup: string, prefix = 'logo') =>
+  markup
+    .replace(/<\?xml[^>]*\?>/, '')
+    .replace(/\bid="([^"]+)"/g, `id="${prefix}-$1"`)
+    .replace(/url\(#([^)]+)\)/g, `url(#${prefix}-$1)`)
+    .replace(/href="#([^"]+)"/g, `href="#${prefix}-$1"`)
+    .trim();
 
 /*
- * Panal: las filas se corren medio paso y se acercan en vertical por 0.866
- * (la altura del triángulo equilátero). Eso es lo que hace que los círculos
- * encastren entre sí en vez de quedar en una grilla cuadrada.
+ * Nubes del fondo: los mismos tonos que el mar de nubes de la foto del hero
+ * (blanco, rosa pálido y lavanda). Posición, tamaño y velocidad a mano, para
+ * que no se lean como una grilla.
  */
-const D = 52; // diámetro de cada celda, en px
-const STEP_X = 56; // paso horizontal: el diámetro más un aire mínimo
-const STEP_Y = Math.round(STEP_X * 0.866);
-
-interface Hive {
-  label: string;
-  /** Cuántas celdas lleva cada fila, de arriba hacia abajo. */
-  rows: number[];
-  logos: Logo[];
-}
-
-const HIVES: Hive[] = [
-  {
-    label: 'Frontend',
-    rows: [5, 4],
-    logos: [
-      reactLogo,
-      nextLogo,
-      angularLogo,
-      astroLogo,
-      typescriptLogo,
-      tailwindLogo,
-      gsapLogo,
-      flutterLogo,
-      reactNativeLogo,
-    ],
-  },
-  {
-    label: 'Backend',
-    rows: [4, 3],
-    logos: [nodeLogo, nestLogo, javaLogo, springLogo, postgresLogo, prismaLogo, supabaseLogo],
-  },
+const CLOUDS = [
+  { left: '-12%', top: '0%', w: '62rem', h: '18rem', color: '#ffffff', speed: 70 },
+  { left: '38%', top: '4%', w: '58rem', h: '16rem', color: '#f6dfd8', speed: 85 },
+  { left: '-6%', top: '34%', w: '46rem', h: '15rem', color: '#ece8f4', speed: 95 },
+  { left: '30%', top: '42%', w: '54rem', h: '17rem', color: '#ffffff', speed: 80 },
+  { left: '62%', top: '30%', w: '44rem', h: '15rem', color: '#f8e6e0', speed: 90 },
+  { left: '8%', top: '66%', w: '60rem', h: '16rem', color: '#f3eef6', speed: 100 },
+  { left: '55%', top: '70%', w: '50rem', h: '15rem', color: '#ffffff', speed: 75 },
 ];
-
-/** Coloca cada logo en su celda y devuelve además el tamaño del panal. */
-function layout({ rows }: Hive) {
-  const widest = Math.max(...rows);
-  const cells = rows.flatMap((count, row) => {
-    const indent = ((widest - count) * STEP_X) / 2;
-    return Array.from({ length: count }, (_, col) => ({
-      left: indent + col * STEP_X,
-      top: row * STEP_Y,
-    }));
-  });
-
-  return {
-    cells,
-    width: (widest - 1) * STEP_X + D,
-    height: (rows.length - 1) * STEP_Y + D,
-  };
-}
 
 /** 18400 → «18,4K». Arriba de mil el número exacto no aporta nada. */
 function formatCount(value: number): string {
@@ -108,7 +85,7 @@ function formatCount(value: number): string {
 /** Una visita por día y por navegador: recargar no infla el número. */
 const VIEW_KEY = 'perfil:visita';
 
-/* Íconos de las tarjetas: van inline, son cuatro y no justifican un paquete. */
+/* Trazo compartido de los íconos dibujados a mano. */
 const stroke = {
   fill: 'none',
   stroke: 'currentColor',
@@ -117,55 +94,40 @@ const stroke = {
   strokeLinejoin: 'round',
 } as const;
 
-const GithubIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="currentColor">
-    <path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3Z" />
-  </svg>
-);
-
-const MailIcon = () => (
+const PinIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" {...stroke}>
-    <rect x="2.75" y="4.75" width="18.5" height="14.5" rx="3" />
-    <path d="m4.5 8 6.4 4.4a2 2 0 0 0 2.2 0L19.5 8" />
+    <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z" />
+    <circle cx="12" cy="10" r="2.4" />
   </svg>
 );
 
-const InstagramIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" {...stroke}>
-    <rect x="3" y="3" width="18" height="18" rx="5.2" />
-    <circle cx="12" cy="12" r="4.1" />
-    <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
-  </svg>
-);
+/* Frases de la nota del avatar, en el orden en que aparecen. */
+const NOTES = [
+  'no tengo miedo de crear',
+  '¿diseñamos algo?',
+  '¿lo construimos juntos?',
+  'de la idea al deploy',
+  'pixel a pixel',
+  'café y código',
+  '¿arrancamos?',
+];
 
-interface Card {
-  icon: () => JSX.Element;
-  label: string;
-  value: string;
-  note: string;
-  href?: string;
-  /** El enlace se arma en el navegador, para no publicar la dirección. */
-  mail?: boolean;
-}
-
-const CARDS: Card[] = [
-  { icon: GithubIcon, label: 'GitHub', value: '@mau-jsx', note: 'Todo el código', href: links.github },
-  // El correo no lleva valor visible ni href fijo: se arma al hidratar.
-  { icon: MailIcon, label: 'Email', value: 'Escribime', note: 'Respondo rápido', mail: true },
-  {
-    icon: InstagramIcon,
-    label: 'Instagram',
-    value: '@mau.jsx',
-    note: 'El detrás',
-    href: links.instagram,
-  },
+/* Las mismas frases en inglés, en el mismo orden. */
+const NOTES_EN = [
+  'not afraid to create',
+  'shall we design something?',
+  'build it together?',
+  'from idea to deploy',
+  'pixel by pixel',
+  'coffee and code',
+  'ready to start?',
 ];
 
 export default function Profile({ portrait }: ProfileProps) {
   const rootRef = useRef<HTMLElement>(null);
   const heartRef = useRef<HTMLSpanElement>(null);
-  // El retrato es de la barra hasta que esta sección entra en pantalla.
-  const [holdsAvatar, setHoldsAvatar] = useState(false);
+  const lang = useLang();
+  const en = lang === 'en';
   const [stats, setStats] = useState<ProfileStats | null>(null);
   const [busy, setBusy] = useState(false);
   // Vacío en el HTML servido; se llena recién al hidratar, en el navegador.
@@ -173,12 +135,23 @@ export default function Profile({ portrait }: ProfileProps) {
 
   useEffect(() => setMailto(getMailto()), []);
 
-  useEffect(() => {
-    const onHolder = (event: Event) =>
-      setHoldsAvatar((event as CustomEvent<{ holder: string }>).detail?.holder === 'perfil');
+  // Nota del avatar: rota entre frases, con un fundido corto entre una y otra.
+  const [noteIndex, setNoteIndex] = useState(0);
+  const [noteVisible, setNoteVisible] = useState(true);
 
-    window.addEventListener('portfolio:nav-avatar', onHolder);
-    return () => window.removeEventListener('portfolio:nav-avatar', onHolder);
+  useEffect(() => {
+    let swap: number | undefined;
+    const timer = window.setInterval(() => {
+      setNoteVisible(false);
+      swap = window.setTimeout(() => {
+        setNoteIndex((i) => (i + 1) % NOTES.length);
+        setNoteVisible(true);
+      }, 260);
+    }, 2800);
+    return () => {
+      window.clearInterval(timer);
+      window.clearTimeout(swap);
+    };
   }, []);
 
   useEffect(() => {
@@ -252,196 +225,245 @@ export default function Profile({ portrait }: ProfileProps) {
       .finally(() => setBusy(false));
   };
 
+  /*
+   * Vidrio esmerilado: blanco translúcido con desenfoque, borde claro y un
+   * brillo arriba. Se apoya sobre las manchas de color del fondo.
+   */
+  const glass =
+    'border border-white/70 bg-white/45 shadow-[0_8px_24px_-14px_rgb(10_10_10/0.35),inset_0_1px_0_rgb(255_255_255/0.85)] backdrop-blur-md dark:border-white/15 dark:bg-white/10 dark:shadow-[0_8px_24px_-14px_rgb(0_0_0/0.8),inset_0_1px_0_rgb(255_255_255/0.12)]';
+
+  /* Pieza en línea del relato: logo + palabra en una cápsula de vidrio. */
+  const chip = (logo: Logo, word: string) => {
+    const dark = logo.variants?.dark;
+    return (
+      <span
+        className={`${glass} mx-[0.05em] inline-flex items-center gap-[0.25em] whitespace-nowrap rounded-full py-[0.06em] pl-[0.22em] pr-[0.42em] align-[0.06em] text-[0.8em] leading-[1.3]`}
+      >
+        <span
+          aria-hidden="true"
+          className={`grid h-[0.95em] w-[0.95em] place-items-center [&>svg]:h-full [&>svg]:w-full ${dark ? 'dark:hidden' : ''}`}
+          dangerouslySetInnerHTML={{ __html: clean(logo.svg, logo.slug) }}
+        />
+        {dark && (
+          <span
+            aria-hidden="true"
+            className="hidden h-[0.95em] w-[0.95em] place-items-center dark:grid [&>svg]:h-full [&>svg]:w-full"
+            dangerouslySetInnerHTML={{ __html: clean(dark, `${logo.slug}-dark`) }}
+          />
+        )}
+        {word}
+      </span>
+    );
+  };
+
+  /* Redes: sólo íconos, en fila debajo del relato. El correo se arma al hidratar. */
+  const socials = [
+    { label: 'GitHub', href: links.github, icon: <HugeiconsIcon icon={Github01Icon} size={24} strokeWidth={1.6} /> },
+    { label: 'LinkedIn', href: links.linkedin, icon: <HugeiconsIcon icon={Linkedin01Icon} size={24} strokeWidth={1.6} /> },
+    { label: 'Instagram', href: links.instagram, icon: <HugeiconsIcon icon={InstagramIcon} size={24} strokeWidth={1.6} /> },
+    { label: 'WhatsApp', href: links.whatsapp, icon: <HugeiconsIcon icon={WhatsappIcon} size={24} strokeWidth={1.6} /> },
+    { label: 'Email', href: mailto, icon: <HugeiconsIcon icon={Mail01Icon} size={24} strokeWidth={1.6} /> },
+  ];
+
   return (
-    <section ref={rootRef} id="perfil" aria-label="Perfil" className="shell flex min-h-[100svh] flex-col justify-center pb-16 pt-28">
-      <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-14">
-        <div data-avatar-card="perfil" className="max-w-[44rem]">
-          {/* Sin marco ni círculo: el dibujo solo, apoyado sobre el fondo. */}
-          <div data-profile-avatar className="flex flex-wrap items-center gap-4">
-            <img
-              {...(holdsAvatar ? { 'data-flip-id': 'nav-avatar' } : {})}
-              src={portrait.src}
-              srcSet={portrait.srcSet}
-              sizes="6rem"
-              alt=""
-              decoding="async"
-              className={`h-16 w-16 shrink-0 object-contain transition-opacity duration-300 sm:h-[4.5rem] sm:w-[4.5rem] ${
-                holdsAvatar ? 'opacity-100' : 'opacity-0'
-              }`}
-            />
-            <p className="text-[clamp(1.6rem,3.2vw,2.35rem)] font-bold leading-none tracking-[-0.035em] text-[var(--fg)]">
-              ¡Hola!
-            </p>
+    <section
+      ref={rootRef}
+      id="perfil"
+      aria-label={t(lang, 'Perfil', 'Profile')}
+      className="relative isolate overflow-x-clip"
+    >
+      {/*
+        Mar de nubes: sigue las nubes del pie del hero y se derrama entre los
+        párrafos. Arranca por encima de la sección (pisa el final del hero, así
+        no hay corte) y se desvanece abajo. Cada nube deriva despacio.
+      */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 -top-48 bottom-0 -z-10 [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_72%,transparent)] dark:opacity-25"
+      >
+        {CLOUDS.map((cloud, i) => (
+          <div
+            key={i}
+            className="cloud-drift absolute rounded-[50%] blur-2xl"
+            style={{
+              left: cloud.left,
+              top: cloud.top,
+              width: cloud.w,
+              height: cloud.h,
+              background: `radial-gradient(closest-side, ${cloud.color} 0%, ${cloud.color}cc 45%, transparent 100%)`,
+              animationDuration: `${cloud.speed}s`,
+              animationDelay: `-${i * 7}s`,
+            }}
+          />
+        ))}
+      </div>
 
-            {/*
-              El me gusta va acá, chico y al costado: se ofrece, no se reclama.
-              Sin datos todavía no se muestra, para no ofrecer un botón muerto.
-            */}
-            {stats && (
-              <button
-                type="button"
-                onClick={toggleLike}
-                aria-pressed={liked}
-                aria-label={liked ? 'Quitar me gusta' : 'Me gusta'}
-                className={`group inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors duration-200 ${
-                  liked
-                    ? 'border-transparent bg-[#fdeaea] text-[#d32f2f] dark:bg-[#3a1616] dark:text-[#ff8a80]'
-                    : 'border-[var(--rule)] text-[var(--fg-muted)] hover:border-[var(--fg-faint)] hover:text-[var(--fg)]'
-                }`}
-              >
-                <span ref={heartRef} className="inline-flex">
-                  <Heart
-                    set={liked ? 'bulk' : 'light'}
-                    primaryColor={liked ? '#d32f2f' : 'currentColor'}
-                    size={18}
-                  />
+      {/*
+        Todo centrado en una sola columna: el relato arriba y, debajo, el CV y
+        las redes en una fila. Alto según el contenido, no una pantalla entera.
+      */}
+      <div className="flex flex-col items-center px-[clamp(1.25rem,4vw,4rem)] py-20 text-center">
+        {/* ── Relato: hablo como hablo, con las cosas en línea ── */}
+        <div className="flex max-w-[62rem] flex-col items-center">
+          {/* Avatar arriba de todo, con su nota flotando encima, como en Instagram. */}
+          <div data-profile-avatar className="relative mt-14">
+            <span className="float-soft pointer-events-none absolute bottom-[calc(100%+0.7rem)] left-1/2 z-10 -translate-x-1/2">
+              <span className="relative block whitespace-nowrap rounded-[1.1rem] bg-white px-3.5 py-2 text-[0.9rem] font-medium leading-tight text-[#0a0a0a] shadow-[0_10px_30px_-12px_rgb(0_0_0/0.35)] sm:px-4 sm:py-2.5 sm:text-lg">
+                <span
+                  aria-live="off"
+                  className={`block transition-[opacity,transform] duration-200 ease-out ${
+                    noteVisible ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
+                  }`}
+                >
+                  {(en ? NOTES_EN : NOTES)[noteIndex]}
                 </span>
-                <span className="tnum">{formatCount(stats.likes)}</span>
-              </button>
-            )}
-
-            {/* Las visitas no se tocan: van como dato, sin forma de botón. */}
-            {stats && (
-              <p className="text-sm text-[var(--fg-faint)]">
-                <span className="tnum font-semibold text-[var(--fg-muted)]">
-                  {formatCount(stats.views)}
-                </span>{' '}
-                visitas
-              </p>
-            )}
+                <span aria-hidden="true" className="absolute -bottom-2 left-[42%] h-2.5 w-2.5 rounded-full bg-white shadow-[0_4px_10px_-4px_rgb(0_0_0/0.3)]" />
+                <span aria-hidden="true" className="absolute -bottom-[0.95rem] left-[36%] h-1.5 w-1.5 rounded-full bg-white" />
+              </span>
+            </span>
+            <span className={`${glass} block h-24 w-24 overflow-hidden rounded-full p-1`}>
+              <img
+                src={portrait.src}
+                srcSet={portrait.srcSet}
+                sizes="6rem"
+                alt="Mauricio Heredia"
+                decoding="async"
+                className="h-full w-full rounded-full bg-[#efe9df] object-cover"
+              />
+            </span>
           </div>
 
           <h2
             data-profile-text
-            className="mt-6 text-[clamp(1.25rem,2vw,1.6rem)] font-semibold leading-[1.3] tracking-[-0.03em] text-[var(--fg)]"
+            className="mt-8 text-[clamp(2.25rem,4.2vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.04em] text-[var(--fg)] [text-wrap:balance]"
           >
-            Diseño y construyo experiencias de usuario.{' '}
-            <span className="text-[var(--fg-faint)]">
-              UI/UX aplicado al frontend, desde {profile.location}.
-            </span>
+            {t(lang, 'Del diseño al código', 'From design to code')}
           </h2>
 
-          <p
+          {/* Relato corto: no más de diez renglones en escritorio. */}
+          <div
             data-profile-text
-            className="mt-4 max-w-[38rem] text-[0.975rem] leading-relaxed text-[var(--fg-muted)]"
+            className="mt-6 flex flex-col gap-[0.7em] text-[clamp(1.05rem,1.55vw,1.75rem)] font-medium leading-[1.55] tracking-[-0.015em] text-[var(--fg)] [text-wrap:pretty]"
           >
-            {profile.about}
-          </p>
+            <p>
+              {t(lang, 'Hola, soy Mauricio Heredia, desarrollador fullstack de', 'Hi, I’m Mauricio Heredia, a full stack developer from')}{' '}
+              <span
+                className={`${glass} mx-[0.05em] inline-flex items-center gap-[0.22em] whitespace-nowrap rounded-full py-[0.06em] pl-[0.26em] pr-[0.42em] align-[0.06em] text-[0.8em] leading-[1.3]`}
+              >
+                <span className="text-[var(--accent)] [&_svg]:h-[0.95em] [&_svg]:w-[0.95em]">
+                  <PinIcon />
+                </span>
+                Formosa Capital
+              </span>
+              {t(
+                lang,
+                ', Argentina, con 3 años de experiencia creando interfaces web.',
+                ', Argentina, with 3 years of experience building web interfaces.',
+              )}
+            </p>
 
-          <a
-            data-profile-text
-            href={links.cv}
-            download
-            className="mt-7 inline-flex items-center gap-2.5 rounded-full bg-[var(--fg)] px-6 py-3 text-sm font-semibold text-[var(--bg)] transition-transform duration-300 hover:-translate-y-0.5"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]" {...stroke}>
-              <path d="M12 3.5v11m0 0 4-4m-4 4-4-4" />
-              <path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2" />
-            </svg>
-            Descargar CV
-          </a>
-        </div>
+            <p className="text-[var(--fg-muted)]">
+              {en ? (
+                <>
+                  My strength is frontend with {chip(nextLogo, 'Next.js')} {chip(angularLogo, 'Angular')}{' '}
+                  {chip(astroLogo, 'Astro')} and {chip(reactLogo, 'React')}, but I also build full
+                  applications with {chip(nodeLogo, 'Node')} {chip(nestLogo, 'Nest')}{' '}
+                  {chip(javaLogo, 'Java')} and {chip(pythonLogo, 'Python')}, using{' '}
+                  {chip(flaskLogo, 'Flask')} or {chip(fastapiLogo, 'FastAPI')}.
+                </>
+              ) : (
+                <>
+                  Mi fuerte es el frontend con {chip(nextLogo, 'Next.js')} {chip(angularLogo, 'Angular')}{' '}
+                  {chip(astroLogo, 'Astro')} y {chip(reactLogo, 'React')}, pero también construyo
+                  aplicaciones completas con {chip(nodeLogo, 'Node')} {chip(nestLogo, 'Nest')}{' '}
+                  {chip(javaLogo, 'Java')} y {chip(pythonLogo, 'Python')}, con{' '}
+                  {chip(flaskLogo, 'Flask')} o {chip(fastapiLogo, 'FastAPI')}.
+                </>
+              )}
+            </p>
 
-        {/* La columna derecha va a un ancho fijo: los panales y las tarjetas
-            comparten borde, así no queda aire suelto entre bloques. */}
-        <div className="flex flex-col gap-8 lg:w-[34rem] lg:pt-2">
-          <div className="flex flex-wrap gap-x-10 gap-y-9">
-          {HIVES.map((hive) => {
-            const { cells, width, height } = layout(hive);
-
-            return (
-              <div key={hive.label}>
-                <p className="type-label mb-4 text-[var(--fg-faint)]">{hive.label}</p>
-
-                <ul
-                  aria-label={`Tecnologías · ${hive.label}`}
-                  style={{ width, height }}
-                  className="relative list-none"
-                >
-                  {hive.logos.map((logo, index) => {
-                    const cell = cells[index];
-                    if (!cell) return null;
-                    const dark = logo.variants?.dark;
-
-                    return (
-                      <li
-                        key={logo.slug}
-                        data-hive-cell
-                        title={logo.title}
-                        style={{ left: cell.left, top: cell.top, width: D, height: D }}
-                        className="absolute"
-                      >
-                        <span className="grid h-full w-full place-items-center rounded-full border border-[var(--rule)] bg-[var(--bg-raised)] shadow-[0_12px_28px_-20px_rgb(0_0_0/0.6)] transition-transform duration-300 [@media(hover:hover)_and_(pointer:fine)]:hover:scale-110">
-                          <span
-                            aria-hidden="true"
-                            className={`col-start-1 row-start-1 block h-[44%] w-[44%] [&>svg]:h-full [&>svg]:w-full ${
-                              dark ? 'dark:hidden' : ''
-                            }`}
-                            dangerouslySetInnerHTML={{ __html: clean(logo.svg) }}
-                          />
-                          {dark && (
-                            <span
-                              aria-hidden="true"
-                              className="col-start-1 row-start-1 hidden h-[44%] w-[44%] dark:block [&>svg]:h-full [&>svg]:w-full"
-                              dangerouslySetInnerHTML={{ __html: clean(dark) }}
-                            />
-                          )}
-                          <span className="sr-only">{logo.title}</span>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            );
-          })}
+            <p className="text-[var(--fg-muted)]">
+              {en ? (
+                <>
+                  In my own projects I build automations with {chip(n8nLogo, 'n8n')} and explore AI
+                  with {chip(pytorchLogo, 'PyTorch')} {chip(langchainLogo, 'LangChain')} and{' '}
+                  {chip(tensorflowLogo, 'TensorFlow')} together with {chip(kerasLogo, 'Keras')}.
+                </>
+              ) : (
+                <>
+                  En proyectos propios armo automatizaciones con {chip(n8nLogo, 'n8n')} y exploro IA
+                  con {chip(pytorchLogo, 'PyTorch')} {chip(langchainLogo, 'LangChain')} y{' '}
+                  {chip(tensorflowLogo, 'TensorFlow')} junto a {chip(kerasLogo, 'Keras')}.
+                </>
+              )}
+            </p>
           </div>
 
-          {/*
-            Cuatro tarjetas en retrato, debajo de las tecnologías: tres son
-            puertas de salida y la última es el logro. Mismo alto, para que se
-            lean como bloque y no sobre aire en la columna.
-          */}
-          <ul className="grid list-none grid-cols-3 gap-4">
-            {CARDS.map(({ icon: Icon, label, value, note, href, mail }) => {
-              const target = mail ? mailto : href;
-          const body = (
-            <>
-              <span className="grid h-11 w-11 place-items-center rounded-full border border-[var(--rule)] text-[var(--fg)] transition-colors duration-200 group-hover:border-transparent group-hover:bg-[var(--fg)] group-hover:text-[var(--bg)]">
-                <Icon />
-              </span>
+          {/* Cierre: CV y el me gusta, chicos, debajo del relato. */}
+          <div data-profile-card className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={links.cv}
+              download
+              className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[var(--fg)] px-6 text-[0.95rem] font-semibold text-[var(--bg)] transition-transform duration-300 hover:-translate-y-0.5"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]" {...stroke}>
+                <path d="M12 3.5v11m0 0 4-4m-4 4-4-4" />
+                <path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2" />
+              </svg>
+              {t(lang, 'Descargar CV', 'Download CV')}
+            </a>
 
-              <span className="mt-auto block">
-                <span className="type-label block text-[var(--fg-faint)]">{label}</span>
-                <span className="mt-1.5 block truncate text-base font-semibold tracking-[-0.01em] text-[var(--fg)]">
-                  {value}
-                </span>
-                <span className="mt-1 block text-sm text-[var(--fg-muted)]">{note}</span>
-              </span>
-            </>
-          );
-
-          const shell =
-            'group flex h-full min-h-[8.5rem] flex-col rounded-2xl border border-[var(--rule)] bg-[var(--bg-raised)] p-5 transition-all duration-300';
-
-          return (
-            <li key={label} data-profile-card>
-              {target ? (
-                <a
-                  href={target}
-                  {...(target.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}
-                  className={`${shell} hover:-translate-y-1 hover:shadow-[0_22px_44px_-30px_rgb(0_0_0/0.7)]`}
+            {/* Sin datos todavía no se muestra, para no ofrecer un botón muerto. */}
+            {stats && (
+              <>
+                <button
+                  type="button"
+                  onClick={toggleLike}
+                  aria-pressed={liked}
+                  aria-label={liked ? t(lang, 'Quitar me gusta', 'Unlike') : t(lang, 'Me gusta', 'Like')}
+                  className={`${glass} inline-flex min-h-12 items-center gap-2 rounded-full px-4 text-[0.95rem] font-medium transition-colors duration-200 ${
+                    liked ? 'text-[#d32f2f] dark:text-[#ff8a80]' : 'text-[var(--fg-muted)] hover:text-[var(--fg)]'
+                  }`}
                 >
-                  {body}
-                </a>
-              ) : (
-                <div className={shell}>{body}</div>
-              )}
-            </li>
-          );
-        })}
-          </ul>
+                  <span ref={heartRef} className="inline-flex">
+                    <Heart
+                      set={liked ? 'bulk' : 'light'}
+                      primaryColor={liked ? '#d32f2f' : 'currentColor'}
+                      size={20}
+                    />
+                  </span>
+                  <span className="tnum">{formatCount(stats.likes)}</span>
+                </button>
+                <span className="text-sm text-[var(--fg-faint)]">
+                  <span className="tnum font-semibold text-[var(--fg-muted)]">
+                    {formatCount(stats.views)}
+                  </span>{' '}
+                  {t(lang, 'visitas', 'views')}
+                </span>
+              </>
+            )}
+          </div>
         </div>
+
+        {/* ── Redes: sólo íconos, en fila ── */}
+        <ul
+          aria-label={t(lang, 'Redes', 'Socials')}
+          className="mt-5 flex list-none flex-row flex-wrap justify-center gap-3"
+        >
+          {socials.map(({ label, href, icon }) => (
+            <li key={label} data-hive-cell>
+              <a
+                href={href || undefined}
+                aria-label={label}
+                title={label}
+                {...(href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}
+                className={`${glass} grid h-16 w-16 place-items-center rounded-full text-[var(--fg)] transition-all duration-300 hover:-translate-y-1 hover:bg-[var(--fg)] hover:text-[var(--bg)] dark:hover:bg-[var(--fg)]`}
+              >
+                {icon}
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

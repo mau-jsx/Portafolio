@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import reactLogo from 'thesvg/react';
@@ -13,8 +13,10 @@ import nodeLogo from 'thesvg/nodejs';
 import nestLogo from 'thesvg/nestjs';
 import prismaLogo from 'thesvg/prisma';
 import postgresLogo from 'thesvg/postgresql';
-import { work, profile, type WorkIcon } from '../data/site';
+import supabaseLogo from 'thesvg/supabase';
+import { work, profile, type WorkIcon, type WorkCategory } from '../data/site';
 import { registerGsap, prefersReducedMotion, EASE_OUT, revealTrigger } from '../lib/motion';
+import { useLang, t, type Lang } from '../lib/i18n';
 
 export interface RepoInfo {
   /** Último push al repositorio, leído de GitHub al compilar. */
@@ -51,6 +53,7 @@ const TECH_LOGOS: Record<string, { svg: string; variants?: Record<string, string
   'Nest.js': nestLogo,
   Prisma: prismaLogo,
   PostgreSQL: postgresLogo,
+  Supabase: supabaseLogo,
 };
 
 /*
@@ -70,12 +73,21 @@ const ICON_PATHS: Record<WorkIcon, string> = {
   infra: 'M4 4.5h16v5H4v-5Zm0 10h16v5H4v-5ZM7.5 7h.01M7.5 17h.01',
 };
 
+/* Pestañas de la sección: cada una arma su propia rueda de tarjetas. */
+const GROUPS: { id: WorkCategory; label: string; labelEn: string; items: typeof work }[] = (
+  [
+    { id: 'freelance', label: 'Freelance', labelEn: 'Freelance' },
+    { id: 'personal', label: 'Personales', labelEn: 'Personal' },
+    { id: 'logro', label: 'Logros', labelEn: 'Awards' },
+  ] as const
+).map((group) => ({ ...group, items: work.filter((entry) => entry.category === group.id) }));
+
 const slugOf = (href?: string) => href?.match(/github\.com\/([^/]+\/[^/?#]+)/)?.[1];
 
 /** «hace 2 meses»: el dato importa como antigüedad, no como fecha exacta. */
-function since(iso: string): string {
+function since(iso: string, lang: Lang): string {
   const days = Math.round((Date.now() - new Date(iso).getTime()) / 86400000);
-  const rtf = new Intl.RelativeTimeFormat('es', { numeric: 'auto' });
+  const rtf = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
   if (days < 30) return rtf.format(-days, 'day');
   if (days < 365) return rtf.format(-Math.round(days / 30), 'month');
   return rtf.format(-Math.round(days / 365), 'year');
@@ -185,6 +197,13 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [index, setIndex] = useState(0);
   const [open, setOpen] = useState(false);
+  const [category, setCategory] = useState<WorkCategory>('freelance');
+  const lang = useLang();
+  // En inglés cada entrada toma sus textos de `en`; id, stack y colores no cambian.
+  const items = useMemo(() => {
+    const list = GROUPS.find((group) => group.id === category)!.items;
+    return lang === 'en' ? list.map((entry) => ({ ...entry, ...entry.en })) : list;
+  }, [category, lang]);
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 767px)');
@@ -194,7 +213,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
     return () => query.removeEventListener('change', sync);
   }, []);
 
-  const active = work[index];
+  const active = items[Math.min(index, items.length - 1)];
   const repo = repos[slugOf(active.href) ?? ''];
 
   useEffect(() => {
@@ -202,14 +221,16 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
     const root = rootRef.current;
     if (!root) return;
 
-    const last = work.length - 1;
+    const last = Math.max(items.length - 1, 0);
+    cardRefs.current = cardRefs.current.slice(0, items.length);
 
     // Posición con su propia inercia: aunque el scroll dé un salto, las
     // tarjetas llegan deslizándose y nunca cambian de golpe.
     const position = positionRef.current;
     const render = (pos: number) => paint(cardRefs.current, pos);
     const glide = gsap.quickTo(position, 'value', {
-      duration: prefersReducedMotion() ? 0 : 0.8,
+      // Siempre desliza, como el scroll suave: con duración 0 la rueda no se repinta.
+      duration: 0.8,
       ease: 'power2.inOut',
       onUpdate: () => render(position.value),
     });
@@ -319,18 +340,33 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
       document.removeEventListener('wheel', onWheel, { capture: true });
       ctx.revert();
     };
-  }, []);
+    // Cada pestaña rehace el pin: el tramo de scroll depende de cuántas tarjetas hay.
+  }, [category]);
 
   const triggerRef = useRef<ScrollTrigger | null>(null);
 
   const setIndexFromCard = (target: number) => {
     const st = triggerRef.current;
     if (!st) return setIndex(target);
-    const y = st.start + (st.end - st.start) * (target / (work.length - 1));
+    const y = st.start + (st.end - st.start) * (target / Math.max(items.length - 1, 1));
     window.scrollTo({ top: y, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
   };
 
   const toggle = () => setOpen((value) => !value);
+
+  /* Al cambiar de pestaña se vuelve al principio del pin: arranca en la primera tarjeta. */
+  const selectCategory = (next: WorkCategory) => {
+    if (next === category) return;
+    const st = triggerRef.current;
+    if (st && window.scrollY > st.start) {
+      const lenis = window.__lenis;
+      if (lenis) lenis.scrollTo(st.start, { immediate: true });
+      else window.scrollTo({ top: st.start });
+    }
+    setOpen(false);
+    setIndex(0);
+    setCategory(next);
+  };
 
   // Hoja del celular: entra desde abajo y se cierra con Esc.
   useEffect(() => {
@@ -364,7 +400,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
     );
 
     return () => tween.kill();
-  }, [open, index, isMobile]);
+  }, [open, index, isMobile, category]);
 
   /* El contenido del detalle: el mismo en la columna y en la hoja. */
   const detail = (
@@ -383,7 +419,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
         {active.award && (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fbeec7] px-2.5 py-1 text-xs font-semibold text-[#8a6300] dark:bg-[#3a2e10] dark:text-[#e9c86a]">
             <Glyph d={TROPHY} className="h-3.5 w-3.5" />
-            {active.award} · Hackatón del Instituto Politécnico Formosa
+            {active.award} · {t(lang, 'Hackatón del Instituto Politécnico Formosa', 'Instituto Politécnico Formosa Hackathon')}
           </span>
         )}
 
@@ -398,11 +434,11 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
 
       <dl data-detail-part className="mt-5 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
         {[
-          { icon: META_ICONS.client, label: 'Para', value: active.client },
-          { icon: META_ICONS.role, label: 'Mi rol', value: active.role },
-          { icon: META_ICONS.period, label: 'Período', value: active.period },
+          { icon: META_ICONS.client, label: t(lang, 'Para', 'Client'), value: active.client },
+          { icon: META_ICONS.role, label: t(lang, 'Mi rol', 'My role'), value: active.role },
+          { icon: META_ICONS.period, label: t(lang, 'Período', 'Period'), value: active.period },
           ...(repo
-            ? [{ icon: META_ICONS.commit, label: 'Último commit', value: since(repo.pushedAt) }]
+            ? [{ icon: META_ICONS.commit, label: t(lang, 'Último commit', 'Last commit'), value: since(repo.pushedAt, lang) }]
             : []),
         ].map((row) => (
           <div key={row.label} className="flex items-start gap-2.5">
@@ -444,12 +480,14 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
             rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full bg-[var(--fg)] px-5 py-3 text-sm font-semibold text-[var(--bg)] transition-opacity duration-200 hover:opacity-85"
           >
-            {active.hrefLabel ?? 'Ver más'}
+            {active.hrefLabel ?? t(lang, 'Ver más', 'See more')}
             <Glyph d="M7 17 17 7M8 7h9v9" />
           </a>
         )}
-        {!isMobile && (
-          <p className="text-xs text-[var(--fg-faint)]">Seguí scrolleando para el siguiente.</p>
+        {!isMobile && items.length > 1 && (
+          <p className="text-xs text-[var(--fg-faint)]">
+            {t(lang, 'Seguí scrolleando para el siguiente.', 'Keep scrolling for the next one.')}
+          </p>
         )}
       </div>
     </>
@@ -459,14 +497,14 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
     <section
       ref={rootRef}
       id="trabajo"
-      aria-label="Trabajo"
+      aria-label={t(lang, 'Trabajo', 'Work')}
       className="shell flex h-[100svh] flex-col pb-8 pt-24"
     >
       <header className="flex items-end justify-between gap-6 pb-5">
         <div>
-          <p className="type-label text-[var(--fg-faint)]">Trabajo</p>
+          <p className="type-label text-[var(--fg-faint)]">{t(lang, 'Trabajo', 'Work')}</p>
           <h2 className="mt-2 text-[clamp(1.6rem,3.4vw,2.4rem)] font-bold leading-none tracking-[-0.035em] text-[var(--fg)]">
-            Lo que construí
+            {t(lang, 'Lo que construí', 'What I built')}
           </h2>
         </div>
 
@@ -475,9 +513,36 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
             {String(index + 1).padStart(2, '0')}
           </span>
           {' / '}
-          {String(work.length).padStart(2, '0')}
+          {String(items.length).padStart(2, '0')}
         </p>
       </header>
+
+      {/* Pestañas: una categoría a la vez, con cuántas entradas tiene. */}
+      <div role="tablist" aria-label={t(lang, 'Tipo de trabajo', 'Type of work')} className="-mt-1 flex gap-1 pb-5 sm:gap-1.5">
+        {GROUPS.map((group) => {
+          const selected = group.id === category;
+          return (
+            <button
+              key={group.id}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              aria-controls="trabajo-detalle"
+              onClick={() => selectCategory(group.id)}
+              className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm sm:gap-2 sm:px-4 font-semibold transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg)] ${
+                selected
+                  ? 'bg-[var(--fg)] text-[var(--bg)]'
+                  : 'text-[var(--fg-muted)] hover:bg-[color-mix(in_srgb,var(--fg)_7%,transparent)] hover:text-[var(--fg)]'
+              }`}
+            >
+              {lang === 'en' ? group.labelEn : group.label}
+              <span className={`tnum text-xs ${selected ? 'opacity-60' : 'text-[var(--fg-faint)]'}`}>
+                {group.items.length}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
       {/*
         Izquierda la rueda de tarjetas, derecha la descripción. El fundido de
@@ -494,7 +559,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
             tarjeta inclinada queda cortada en línea recta.
           */}
           <div className="absolute inset-y-0 -inset-x-24 [mask-image:linear-gradient(to_bottom,transparent,#000_16%,#000_84%,transparent)]">
-          {work.map((entry, i) => {
+          {items.map((entry, i) => {
             const offset = i - index;
 
             return (
@@ -581,7 +646,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
                           <span className="sr-only">{entry.award}</span>
                         </span>
                       ) : (
-                        <span className="text-white/70">Desarrollador</span>
+                        <span className="text-white/70">{t(lang, 'Desarrollador', 'Developer')}</span>
                       )}
                     </span>
                   </span>
@@ -594,7 +659,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
                     tabIndex={offset === 0 ? 0 : -1}
                     className="group flex shrink-0 items-center rounded-full bg-[#141414] py-1 pl-4 pr-1 text-sm font-medium text-white transition-colors duration-200 hover:bg-black md:hidden"
                   >
-                    {open ? 'Cerrar' : 'Ver'}
+                    {open ? t(lang, 'Cerrar', 'Close') : t(lang, 'Ver', 'View')}
                     <span className="ml-3 grid h-9 w-9 place-items-center rounded-full bg-white/10">
                       <svg
                         viewBox="0 0 24 24"
@@ -641,7 +706,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
         >
           <button
             type="button"
-            aria-label="Cerrar"
+            aria-label={t(lang, 'Cerrar', 'Close')}
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-black/45"
           />
@@ -659,7 +724,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Cerrar detalle"
+              aria-label={t(lang, 'Cerrar detalle', 'Close details')}
               className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-[var(--rule)] text-[var(--fg-muted)]"
             >
               <Glyph d="M6 6l12 12M18 6 6 18" />

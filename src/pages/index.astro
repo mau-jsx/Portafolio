@@ -15,6 +15,18 @@ import fondoLetra from '../assets/fondo-letra.jpg';
 import capturaFullstack from '../assets/fullstack.jpg';
 import capturaFrontend from '../assets/frotend.jpg';
 import fondoTrabajo from '../assets/fondo-trabajo.jpg';
+import heroMontana from '../assets/hero-montana.jpg';
+
+// Fondo del hero: cielo limpio arriba y la montaña sobre las nubes abajo.
+// Calidad alta (88) y hasta 3840px: es la imagen que más se ve del sitio.
+const skyWidths = [1280, 1920, 2880, 3840];
+const skySources = await Promise.all(
+  skyWidths.map((width) => getImage({ src: heroMontana, width, format: 'webp', quality: 88 })),
+);
+const sky = {
+  src: skySources[1].src,
+  srcSet: skySources.map((v, i) => `${v.src} ${skyWidths[i]}w`).join(', '),
+};
 
 // La escena WebGL consume una textura optimizada, no el JPG original.
 const sceneImage = await getImage({ src: fondo, width: 1600, format: 'webp', quality: 76 });
@@ -121,6 +133,7 @@ const year = new Date().getFullYear();
     <Hero
       photo={photo}
       portrait={portrait}
+      sky={sky}
       fullstack={shotFullstack}
       frontend={shotFrontend}
       client:load
@@ -142,6 +155,8 @@ const year = new Date().getFullYear();
         target="_blank"
         rel="noreferrer"
         class="underline decoration-[var(--rule)] transition-colors duration-200 hover:text-[var(--accent)]"
+        data-es="Código"
+        data-en="Source code"
       >
         Código
       </a>
