@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import reactLogo from 'thesvg/react';
@@ -128,6 +129,18 @@ const META_ICONS = {
 
 const TROPHY =
   'M7 4h10v5a5 5 0 0 1-10 0V4Zm0 1.5H4.5v1A3.5 3.5 0 0 0 7.6 10M17 5.5h2.5v1a3.5 3.5 0 0 1-3.1 3.5M12 14v3.5m-3.5 3h7m-5.5 0c0-1.7.9-3 2-3s2 1.3 2 3';
+
+/* Sello ondulado del detalle en celular: un círculo con 12 lóbulos suaves. */
+const SEAL = (() => {
+  const lobes = 12;
+  const steps = 120;
+  const points = Array.from({ length: steps }, (_, i) => {
+    const angle = (i / steps) * Math.PI * 2;
+    const r = 44 + 4 * Math.cos(angle * lobes);
+    return `${(50 + r * Math.cos(angle)).toFixed(2)} ${(50 + r * Math.sin(angle)).toFixed(2)}`;
+  });
+  return `M${points.join('L')}Z`;
+})();
 
 function Glyph({ d, className = 'h-4 w-4' }: { d: string; className?: string }) {
   return (
@@ -695,44 +708,107 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
 
       {/*
         Celular: no hay lugar para dos columnas, así que el detalle sube en una
-        hoja. `data-lenis-prevent` deja que se scrollee por dentro.
+        hoja. Va al body con un portal: el pin le pone un transform a la
+        sección y, adentro, `fixed` quedaba encerrado en ella en vez de cubrir
+        la pantalla. `data-lenis-prevent` deja que se scrollee por dentro.
       */}
-      {open && isMobile && (
+      {open &&
+        isMobile &&
+        createPortal(
         <div
           role="dialog"
           aria-modal="true"
           aria-label={active.title}
-          className="fixed inset-0 z-[90] flex items-end"
+          className="fixed inset-0 z-[90] flex items-end p-2"
         >
+          {/* Fondo: la página sigue ahí, desenfocada, como en iOS. */}
           <button
             type="button"
             aria-label={t(lang, 'Cerrar', 'Close')}
             onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-black/45"
+            className="absolute inset-0 bg-black/25 backdrop-blur-md"
           />
+          {/*
+            Hoja flotante: separada de los bordes y redondeada entera, con el
+            contenido centrado. Arriba el sello del proyecto, abajo un solo
+            botón ancho.
+          */}
           <div
             data-work-sheet
             data-lenis-prevent
             ref={detailRef}
             id="trabajo-detalle"
-            className="relative flex max-h-[86svh] w-full flex-col overflow-y-auto rounded-t-[1.75rem] bg-[var(--bg-raised)] px-5 pb-8 pt-3"
+            className="relative flex max-h-[88svh] w-full flex-col items-center overflow-y-auto rounded-[2.5rem] bg-white px-6 pb-6 pt-9 text-center text-[#1d1d1f] shadow-[0_24px_60px_-20px_rgb(0_0_0/0.45)]"
           >
-            <span
-              aria-hidden="true"
-              className="mx-auto mb-4 block h-1 w-10 rounded-full bg-[var(--rule-strong)]"
-            />
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label={t(lang, 'Cerrar detalle', 'Close details')}
-              className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-[var(--rule)] text-[var(--fg-muted)]"
-            >
-              <Glyph d="M6 6l12 12M18 6 6 18" />
-            </button>
-            {detail}
+            <span data-detail-part className="relative grid h-24 w-24 place-items-center">
+              <svg viewBox="0 0 100 100" aria-hidden="true" className="absolute inset-0 h-full w-full">
+                <path d={SEAL} fill={`color-mix(in srgb, ${active.accent} 32%, white)`} />
+              </svg>
+              <span className="relative" style={{ color: `color-mix(in srgb, ${active.accent} 70%, #000)` }}>
+                <Glyph d={ICON_PATHS[active.icon]} className="h-9 w-9" />
+              </span>
+            </span>
+
+            <h3 data-detail-part className="mt-5 text-[1.75rem] font-semibold leading-tight tracking-[-0.03em]">
+              {active.title}
+            </h3>
+            <p data-detail-part className="mt-1.5 text-[0.8rem] text-[#6e6e73]">
+              {[active.client, active.role, active.period].join(' · ')}
+            </p>
+
+            {active.award && (
+              <span
+                data-detail-part
+                className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#fbeec7] px-3 py-1 text-xs font-semibold text-[#8a6300]"
+              >
+                <Glyph d={TROPHY} className="h-3.5 w-3.5" />
+                {active.award}
+              </span>
+            )}
+
+            <p data-detail-part className="mt-4 max-w-[34ch] text-[0.9rem] leading-relaxed text-[#515154]">
+              {active.description}
+            </p>
+
+            <ul data-detail-part className="mt-4 flex list-none flex-wrap justify-center gap-1.5">
+              {active.stack.map((name) => (
+                <li
+                  key={name}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#f2f2f4] px-3 py-1.5 text-xs font-medium text-[#3a3a3c]"
+                >
+                  <TechMark name={name} />
+                  {name}
+                </li>
+              ))}
+            </ul>
+
+            <div data-detail-part className="mt-7 flex w-full flex-col gap-2">
+              {active.href && (
+                <a
+                  href={active.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#2b2b2d] text-[0.95rem] font-medium text-white transition-opacity duration-200 active:opacity-80"
+                >
+                  {active.hrefLabel ?? t(lang, 'Ver más', 'See more')}
+                  <Glyph d="M7 17 17 7M8 7h9v9" />
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label={t(lang, 'Cerrar detalle', 'Close details')}
+                className={`flex min-h-12 w-full items-center justify-center rounded-full text-[0.95rem] font-medium transition-opacity duration-200 active:opacity-80 ${
+                  active.href ? 'text-[#6e6e73]' : 'bg-[#2b2b2d] text-white'
+                }`}
+              >
+                {t(lang, 'Listo', 'Done')}
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </section>
   );
 }
