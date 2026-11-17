@@ -79,7 +79,7 @@ export default function Nav({ avatar }: NavProps) {
    * barra de secciones. Al bajar — o en pantallas angostas, donde las
    * etiquetas no entran — todo se junta en una cápsula que despliega el menú.
    */
-  const compact = detached || !isWide;
+  const compact = detached && isWide;
 
   /*
    * La cápsula lleva su propio retrato, siempre. Antes uno solo viajaba entre
@@ -129,7 +129,7 @@ export default function Nav({ avatar }: NavProps) {
         start: DETACH_AT,
         end: 'max',
         onToggle: (self) => {
-          captureFlip();
+          if (window.matchMedia('(min-width: 768px)').matches) captureFlip();
           setDetached(self.isActive);
         },
       });
@@ -252,6 +252,37 @@ export default function Nav({ avatar }: NavProps) {
     );
   };
 
+  /* Celular: sólo el ícono; el activo lleva además su nombre, como en compu. */
+  const mobileLink = (item: (typeof navItems)[number]) => {
+    const id = item.href.slice(1);
+    const isActive = active === id;
+    const Icon = SECTION_ICONS[id];
+
+    return (
+      <a
+        key={item.href}
+        href={item.href}
+        aria-current={isActive ? 'true' : undefined}
+        aria-label={isActive ? undefined : labelOf(item)}
+        className={`flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full text-[0.9rem] font-medium transition-all duration-300 ${
+          isActive
+            ? 'bg-[color-mix(in_srgb,var(--accent)_52%,transparent)] pl-1.5 pr-3.5 text-[var(--fg)]'
+            : 'text-[var(--fg-muted)]'
+        }`}
+      >
+        <span
+          aria-hidden="true"
+          className={`grid shrink-0 place-items-center rounded-full transition-all duration-300 ${
+            isActive ? 'h-8 w-8 bg-[var(--fg)] text-[var(--bg)]' : 'h-6 w-6 text-current'
+          }`}
+        >
+          <Icon set="light" primaryColor="currentColor" size={isActive ? 17 : 20} />
+        </span>
+        {isActive && labelOf(item)}
+      </a>
+    );
+  };
+
   /* Idioma: globo con el código del idioma actual; un toque cambia al otro. */
   const langButton = (
     <button
@@ -267,12 +298,36 @@ export default function Nav({ avatar }: NavProps) {
 
   return (
     <header ref={headerRef} className="nav-root pointer-events-none fixed inset-x-0 top-0 z-50">
-      <div
-        aria-hidden="true"
-        className={`nav-scrim absolute inset-x-0 top-0 ${compact ? 'is-detached' : ''}`}
-      />
+      {isWide && (
+        <div
+          aria-hidden="true"
+          className={`nav-scrim absolute inset-x-0 top-0 ${compact ? 'is-detached' : ''}`}
+        />
+      )}
 
-      {compact ? (
+      {!isWide ? (
+        /*
+         * ── Celular: barra siempre abierta ─────────────────────────────
+         * Arriba de todo se queda arriba; al bajar se desliza al pie de la
+         * pantalla, donde el pulgar llega sin estirarse.
+         */
+        <div
+          className="pointer-events-auto mx-auto mt-[max(0.75rem,env(safe-area-inset-top))] w-fit max-w-[calc(100vw-1rem)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{
+            transform: detached
+              ? 'translateY(calc(100dvh - 100% - max(0.75rem, env(safe-area-inset-top)) - max(0.75rem, env(safe-area-inset-bottom))))'
+              : 'none',
+          }}
+        >
+          <div className="nav-surface flex items-center gap-0.5 rounded-full p-1.5 shadow-[0_10px_32px_-18px_rgb(0_0_0/0.45)]">
+            <nav aria-label={t(lang, 'Secciones', 'Sections')} className="flex items-center gap-0.5">
+              {navItems.map((item) => mobileLink(item))}
+            </nav>
+            <span aria-hidden="true" className="mx-0.5 h-6 w-px bg-[var(--rule)]" />
+            {langButton}
+          </div>
+        </div>
+      ) : compact ? (
         /* ── Cápsula ─────────────────────────────────────────────────── */
         <div className="pointer-events-auto relative mx-auto mt-4 w-fit">
           <div
