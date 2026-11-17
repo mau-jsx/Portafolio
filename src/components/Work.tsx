@@ -511,7 +511,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
       ref={rootRef}
       id="trabajo"
       aria-label={t(lang, 'Trabajo', 'Work')}
-      className="shell flex h-[100svh] flex-col pb-8 pt-24"
+      className="shell flex h-[100svh] flex-col overflow-x-clip pb-8 pt-24"
     >
       <header className="flex items-end justify-between gap-6 pb-5">
         <div>
@@ -585,7 +585,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
                 onClick={() => offset !== 0 && setIndexFromCard(i)}
                 // Primer cuadro: sólo la activa. Después `paint` escribe directo.
                 style={{ zIndex: 20 - i * 2, opacity: i === 0 ? 1 : 0, transform: 'translateY(-50%)' }}
-                className={`absolute left-1/2 top-1/2 -ml-[min(11rem,40vw)] flex h-[min(30rem,60%)] w-[min(22rem,80vw)] flex-col overflow-hidden rounded-[1.6rem] text-white shadow-[0_40px_80px_-50px_rgb(0_0_0/0.7)] will-change-transform ${
+                className={`absolute left-1/2 top-1/2 -ml-[min(11rem,40vw)] flex h-[min(30rem,60%)] min-h-fit w-[min(22rem,80vw)] flex-col overflow-hidden rounded-[1.6rem] text-white shadow-[0_40px_80px_-50px_rgb(0_0_0/0.7)] will-change-transform ${
                   offset !== 0 ? 'cursor-pointer' : ''
                 }`}
               >
@@ -617,7 +617,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
 
                 <div data-card-content className="relative flex items-start justify-between gap-3 p-6" style={{ opacity: i === 0 ? 1 : 0 }}>
                   <div>
-                    <h3 className="text-[1.85rem] font-semibold leading-[1.08] tracking-[-0.03em]">
+                    <h3 className="text-[1.5rem] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[1.85rem]">
                       {entry.title}
                     </h3>
                     <p className="mt-2 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white/80">
@@ -632,7 +632,7 @@ export default function Work({ repos, portrait, cover }: WorkProps) {
 
                 {/* Símbolo del proyecto, en vidrio, flotando en el medio. */}
                 <div data-card-content className="relative grid flex-1 place-items-center" style={{ opacity: i === 0 ? 1 : 0 }}>
-                  <span className="grid h-20 w-20 place-items-center rounded-full border border-white/25 bg-white/10 backdrop-blur-md">
+                  <span className="grid h-16 w-16 place-items-center rounded-full border border-white/25 bg-white/10 backdrop-blur-md sm:h-20 sm:w-20">
                     <Glyph d={ICON_PATHS[entry.icon]} className="h-9 w-9" />
                   </span>
                 </div>

@@ -38,10 +38,10 @@ export default function SmoothScroll() {
     const lenis = new Lenis({
       lerp: 0.055,
       wheelMultiplier: isGecko ? 0.45 : 0.85,
-      touchMultiplier: 1.4,
       smoothWheel: true,
-      syncTouch: true,
-      syncTouchLerp: 0.09,
+      // Con el dedo, el scroll nativo del teléfono: el suavizado sobre el
+      // touch multiplicaba cada deslizamiento y la página volaba.
+      syncTouch: false,
     });
 
     lenis.on('scroll', ScrollTrigger.update);
